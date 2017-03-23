@@ -4,17 +4,20 @@
 int TOKEN = 0;
 int tArray[1000];
 int newCount = 0;
-
+char variableList[1000][11];
+int VarNum=0;
+int stack[1000]=0;
+int num2=0;
 
 //Allows for readability of code
 typedef enum
 {
-    nulsym = 1, identsym, numbersym, plussym, minussym,
-    multsym,  slashsym, oddsym, eqlsym, neqsym, lessym, leqsym,
-    gtrsym, geqsym, lparentsym, rparentsym, commasym, semicolonsym,
-    periodsym, becomessym, beginsym, endsym, ifsym, thensym,
-    whilesym, dosym, callsym, constsym, varsym, procsym, writesym,
-    readsym, elsesym
+    nulsym = 1, identsym=2, numbersym=3, plussym=4, minussym=5,
+    multsym=6,  slashsym=7, oddsym=8, eqlsym=9, neqsym=10, lessym=11, leqsym=12,
+    gtrsym=13, geqsym=14, lparentsym=15, rparentsym=16, commasym=17, semicolonsym=18,
+    periodsym=19, becomessym=20, beginsym=21, endsym=22, ifsym=23, thensym=24,
+    whilesym=25, dosym=26, callsym=27, constsym=28, varsym=29, procsym=30, writesym=31,
+    readsym=32, elsesym=33
 } tokenType;
 
 void main3()
@@ -28,15 +31,25 @@ void main3()
     fgets(word, 128, file);
     tArray[0] = atoi(strtok(word, space));
     //printf("%d\n",tArray[0]);
-    int j = 1;
+    int j = 0;
 
-    while(fgets(word, 128, file) != NULL)
+   /* while(fgets(word, 128, file) != NULL)
 	{
         tArray[j] = atoi(strtok(word, space));
         j++;
         //printf("%d\n",tArray[j]);
+    }*/
+	while( fscanf(file, "%d", TOKEN) ==1) {
+            tArray[j] = TOKEN;
+            if (TOKEN==2)
+			{
+			memset(&varName, 0, sizeof(varName));//reset unstruction
+			fscanf(file, "%s", varName);
+			strcpy(variableList[VarNum], varName);
+			VarNum++;
+			}
+			j++;
     }
-
     PROGRAM();
 }
 
@@ -133,6 +146,7 @@ void STATEMENT()
 	// printf("p%dj",TOKEN);
 	if(TOKEN == identsym)
 	{
+		num2++;//tells where on the list of string to find current one
 		GETTOKEN();
 		if(TOKEN != becomessym)
 			ERROR(13);
