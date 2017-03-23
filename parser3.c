@@ -5,6 +5,8 @@ int TOKEN = 0;
 int tArray[1000];
 int count = 0;
 
+
+//Allows for readability of code
 typedef enum
 {
     nulsym = 1, identsym, numbersym, plussym, minussym,
@@ -246,10 +248,10 @@ void FACTOR()
 	else if(TOKEN == numbersym)
 		GETTOKEN();
 	else if(TOKEN == lparentsym)
-	{
 		GETTOKEN();
-		EXPRESSION();
-	}
+	
+	EXPRESSION();
+	
 	if(TOKEN != rparentsym)
 		ERROR();
 		GETTOKEN();
