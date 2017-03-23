@@ -146,7 +146,7 @@ void STATEMENT()
 	// printf("p%dj",TOKEN);
 	if(TOKEN == identsym)
 	{
-		num2++;//tells where on the list of string to find current one
+		
 		GETTOKEN();
 		if(TOKEN != becomessym)
 			ERROR(13);
@@ -154,6 +154,7 @@ void STATEMENT()
 		//printf("p%dp",TOKEN);
 		EXPRESSION();
 		//printf("p%dp",TOKEN);
+		num2++;//tells where on the list of string to find current one
 	}
 	else if(TOKEN == callsym)
 	{
