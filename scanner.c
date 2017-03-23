@@ -26,7 +26,7 @@ int main2() {
     int waitForIt=0;
 
     char* word = (char*)malloc(sizeof(char)*128);
-
+//
 
     if(file==NULL)
         return 1;
