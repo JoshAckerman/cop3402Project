@@ -3,7 +3,7 @@
 
 int TOKEN = 0;
 int tArray[1000];
-int count = 0;
+int newCount = 0;
 
 
 //Allows for readability of code
@@ -17,7 +17,7 @@ typedef enum
     readsym, elsesym
 } tokenType;
 
-void main()
+void main3()
 {
     FILE* file;
     file = fopen("i.txt","r");
@@ -42,9 +42,9 @@ void main()
 
 void GETTOKEN()
 {
-    TOKEN = tArray[count];
-    //printf("%d\n",count);
-    count++;
+    TOKEN = tArray[newCount];
+    //printf("%d\n",newCount);
+    newCount++;
 }
 
 void PROGRAM()
@@ -104,7 +104,7 @@ void BLOCK()
         }
 			//("%d",TOKEN);
         GETTOKEN();
-        
+
 
 
 		while(TOKEN == procsym)
@@ -135,7 +135,7 @@ void STATEMENT()
 	{
 		GETTOKEN();
 		if(TOKEN != becomessym)
-			ERROR(13); 
+			ERROR(13);
 		GETTOKEN();
 		//printf("p%dp",TOKEN);
 		EXPRESSION();
