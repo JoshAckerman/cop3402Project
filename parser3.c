@@ -1,22 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int TOKEN=0;
+int TOKEN = 0;
 int tArray[1000];
-int count=0;
+int count = 0;
+
+typedef enum
+{
+    nulsym = 1, identsym, numbersym, plussym, minussym,
+    multsym,  slashsym, oddsym, eqlsym, neqsym, lessym, leqsym,
+    gtrsym, geqsym, lparentsym, rparentsym, commasym, semicolonsym,
+    periodsym, becomessym, beginsym, endsym, ifsym, thensym,
+    whilesym, dosym, callsym, constsym, varsym, procsym, writesym,
+    readsym, elsesym
+} tokenType;
 
 void main()
 {
     FILE* file;
-    file=fopen("i.txt","r");
-    char* word = (char*)malloc(sizeof(char)*128);
+    file = fopen("i.txt","r");
+    char* word = (char*)malloc(sizeof(char) * 128);
     char space[2] = " ";
 
     //Gets the information from the file.
     fgets(word, 128, file);
-    tArray[0]= atoi(strtok(word, space));
+    tArray[0] = atoi(strtok(word, space));
     //printf("%d\n",tArray[0]);
-    int j=1;
+    int j = 1;
 	
     while(fgets(word, 128, file) != NULL)
 	{
@@ -30,7 +40,7 @@ void main()
 
 void GETTOKEN()
 {
-    TOKEN=tArray[count];
+    TOKEN = tArray[count];
     //printf("%d\n",count);
     count++;
 }
@@ -42,7 +52,7 @@ void PROGRAM()
 	BLOCK();
 	//printf("f");
 	
-	if (TOKEN != 19)
+	if (TOKEN != whilesym)
 		ERROR();
 	
 	return 0;
@@ -50,51 +60,61 @@ void PROGRAM()
 
 void BLOCK()
 {
-	if( TOKEN == 28)
+	if(TOKEN == constsym)
 	{
-		while(TOKEN != 17)
+		while(TOKEN != commasym)
 		{
 			GETTOKEN();
-			if( TOKEN != 2){ERROR();}
+			if(TOKEN != identsym)
+				ERROR();
 			GETTOKEN();
-			if (TOKEN != 9 ) {ERROR();}//May be wrong
+			if(TOKEN != eqlsym)
+				ERROR();
+			//May be wrong
 			GETTOKEN();
-			if (TOKEN != 3) {ERROR();}
+			if(TOKEN != numbersym)
+				ERROR();
 			GETTOKEN();
 		}
 		
-		if (TOKEN != 18) {ERROR();}
-		GETTOKEN();
+		if(TOKEN != periodsym)
+			ERROR();
 		
+		GETTOKEN();
 	}
 
-	if (TOKEN == 29)
+	if(TOKEN == varsym)
 	{
 		//My be wrong
 		do
 		{
 			GETTOKEN();
-			if (TOKEN != 2) { ERROR();}
+			if(TOKEN != identsym)
+				ERROR();
 			GETTOKEN();
 			//printf("%dh",TOKEN);
         }
-		while(TOKEN == 17)
+		while(TOKEN == commasym)
 		{
 
-			if (TOKEN != 18){ERROR();}
+			if(TOKEN != semicolonsym)
+				ERROR();
 			//("%d",TOKEN);
 			GETTOKEN();
         }
 		
-		while( TOKEN == 30)
+		while(TOKEN == procsym)
 		{
 			GETTOKEN();
-			if (TOKEN != 2){ERROR();}
+			if(TOKEN != identsym)
+				ERROR();
 			GETTOKEN();
-			if (TOKEN != 18) { ERROR();}
+			if(TOKEN != semicolonsym)
+				ERROR();
 			GETTOKEN();
 			BLOCK();
-			if (TOKEN != 18) {ERROR();}
+			if(TOKEN != semicolonsym)
+				ERROR();
 			GETTOKEN();
 		}
 				  
@@ -107,48 +127,53 @@ void BLOCK()
 void STATEMENT()
 {
 	// printf("p%dj",TOKEN);
-	if( TOKEN == 2)
+	if(TOKEN == identsym)
 	{
 		GETTOKEN();
-		if (TOKEN != 20) {ERROR();}
+		if(TOKEN != becomessym)
+			ERROR();
 		GETTOKEN();
 		//printf("p%dp",TOKEN);
 		EXPRESSION();
 		//printf("p%dp",TOKEN);
 	}
-	else if (TOKEN == 27)
+	else if(TOKEN == callsym)
 	{
 		GETTOKEN();
-		if (TOKEN != 2 ){ERROR();}
+		if (TOKEN != identsym)
+			ERROR();
 		GETTOKEN();
 	}
-    else if (TOKEN == 21)
+    else if(TOKEN == beginsym)
 	{
 		GETTOKEN();
 		STATEMENT();
-		while (TOKEN == 18)
+		while(TOKEN == semicolonsym)
 		{
 			GETTOKEN();
 			STATEMENT();
 		}
 		//printf("f");
-		if (TOKEN != 22) {ERROR();}
+		if(TOKEN != endsym)
+			ERROR();
 
 		GETTOKEN();
 	}
-	else if (TOKEN == 23)
+	else if (TOKEN == ifsym)
 	{
 		GETTOKEN();
 		CONDITION();
-		if (TOKEN != 24) {ERROR();}
+		if (TOKEN != thensym)
+			ERROR();
 		GETTOKEN();
 		STATEMENT();
 	}
-	else if (TOKEN == 25)
+	else if (TOKEN == whilesym)
 	{
 		GETTOKEN();
 		CONDITION();
-		if (TOKEN != 26){ERROR();}
+		if(TOKEN != dosym)
+			ERROR();
 		GETTOKEN();
 		STATEMENT();
 	}
@@ -158,8 +183,7 @@ void STATEMENT()
 
 void CONDITION()
 {
-
-	if (TOKEN == 8)
+	if(TOKEN == oddsym)
 	{
 		GETTOKEN();
 		EXPRESSION();
@@ -167,13 +191,18 @@ void CONDITION()
 	else
 	{
 		EXPRESSION();
-		if (TOKEN != 9)  {ERROR();}
-		if (TOKEN != 10)  {ERROR();}
-		if (TOKEN != 11)  {ERROR();}
-		if (TOKEN != 12)  {ERROR();}
-		if (TOKEN != 13)  {ERROR();}
-
-		if (TOKEN != 14)  {ERROR();}
+		if (TOKEN != eqlsym)
+			ERROR();
+		if (TOKEN != neqsym)
+			ERROR();
+		if (TOKEN != lessym)
+			ERROR();
+		if (TOKEN != leqsym)
+			ERROR();
+		if (TOKEN != gtrsym)
+			ERROR();
+		if (TOKEN != geqsym)
+			ERROR();
 		GETTOKEN();
 		EXPRESSION();
 	}
@@ -182,15 +211,15 @@ void CONDITION()
 void EXPRESSION()
 {
 	//printf("h%dh",TOKEN);
-	if (TOKEN == 4)
+	if(TOKEN == plussym)
 		GETTOKEN();
 	
-	if(TOKEN==5)
+	if(TOKEN == minussym)
 		GETTOKEN();
 	
 	TERM();
 	
-	while (TOKEN == 4 || TOKEN == 5)
+	while(TOKEN == plussym || TOKEN == minussym)
 	{
 		GETTOKEN();
 		TERM();
@@ -201,7 +230,8 @@ void TERM()
 {
 	//printf("g%dp",TOKEN);
 	FACTOR();
-	while (TOKEN ==6 ||TOKEN ==7 )
+	
+	while(TOKEN == multsym ||TOKEN == slashsym)
 	{
 		GETTOKEN();
 		FACTOR();
@@ -211,14 +241,16 @@ void TERM()
 void FACTOR()
 {
 	//printf("i%dh",TOKEN);
-	if (TOKEN == 2 )
+	if(TOKEN == identsym)
 		GETTOKEN();
-	else if (TOKEN == 3)
+	else if(TOKEN == numbersym)
 		GETTOKEN();
-	else if (TOKEN == 15)
+	else if(TOKEN == lparentsym)
+	{
 		GETTOKEN();
 		EXPRESSION();
-	if(TOKEN != 16)
+	}
+	if(TOKEN != rparentsym)
 		ERROR();
 		GETTOKEN();
 	else 
@@ -293,8 +325,7 @@ void ERROR(int errorCase)
             printf("Error 21: Expression must not contain a procedure identifier.\n");
             break;
         case 22:
-            printf("Error 22: ");
-            printf("Right parenthesis missing.\n");
+            printf("Error 22: Right parenthesis missing.\n");
             break;
         case 23:
             printf("Error 23: The preceding factor cannot begin with this symbol.\n");
@@ -304,9 +335,6 @@ void ERROR(int errorCase)
             break;
         case 25:
             printf("Error 25: This number is too large.\n");
-            break;
-        case 26:
-            printf("Error: 26 Level is larger than the maximum allowed lexicographical levels!\n");
             break;
         default:
             break;
