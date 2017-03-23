@@ -88,14 +88,15 @@ void BLOCK()
 	if(TOKEN == varsym)
 	{
 		//My be wrong
-		while(TOKEN != commasym)
+		do
 		{
 			GETTOKEN();
 			if(TOKEN != identsym)
 				ERROR(4);
 			GETTOKEN();
 			//printf("%dh",TOKEN);
-        }
+        	}
+		while(TOKEN == commasym);
 
         if(TOKEN != semicolonsym)
         {
