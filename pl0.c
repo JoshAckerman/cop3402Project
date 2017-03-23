@@ -33,7 +33,7 @@ void main1()
     for(i=0; i<count; i++)
     {
         //fprintf(fw, "%4d", i);
-        //printf("%d\n", op[i]);
+        //printf("%d\n", op[i])
         if(op[i]==1)
         {
             strcpy(word, "lit");
