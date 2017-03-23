@@ -82,6 +82,7 @@ void BLOCK()
 			GETTOKEN();
 			if(TOKEN != identsym)
 				ERROR(4);
+			num2++;
 			GETTOKEN();
 			if(TOKEN != eqlsym)
 				ERROR(3);
@@ -106,6 +107,7 @@ void BLOCK()
 			GETTOKEN();
 			if(TOKEN != identsym)
 				ERROR(4);
+			num2++;
 			GETTOKEN();
 			//printf("%dh",TOKEN);
         	}
@@ -125,6 +127,7 @@ void BLOCK()
 			GETTOKEN();
 			if(TOKEN != identsym)
 				ERROR(4);
+			num2++;
 			GETTOKEN();
 			if(TOKEN != semicolonsym)
 				ERROR(5);
@@ -161,6 +164,7 @@ void STATEMENT()
 		GETTOKEN();
 		if (TOKEN != identsym)
 			ERROR(14);
+		num2++;
 		GETTOKEN();
 	}
     else if(TOKEN == beginsym)
@@ -252,6 +256,7 @@ void FACTOR()
 	//printf("i%dh",TOKEN);
 	if(TOKEN == identsym)
 		GETTOKEN();
+	num2++:
 	else if(TOKEN == numbersym)
 		GETTOKEN();
 	else if(TOKEN == lparentsym)
