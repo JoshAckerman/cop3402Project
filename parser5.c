@@ -7,8 +7,11 @@ int newCount = 0;
 char variableList[1000][11];
 int VarNum=0;
 int stack[1000]={0};
+int registers[16];
+int curReg=0;
 int stackloc=0;
 int num2=0;
+int decCounter=0;//when procs are implemented this will become an array with proc number being part 1 
 
 //Allows for readability of code
 typedef enum
@@ -44,6 +47,7 @@ void main3()
             tArray[j] = TOKEN;
             if (TOKEN==2)
 			{
+		    decCounter++;
 			memset(&varName, 0, sizeof(varName));//reset unstruction
 			fscanf(file, "%s", varName);
 			strcpy(variableList[VarNum], varName);
@@ -76,6 +80,10 @@ void PROGRAM()
 
 void BLOCK()
 {
+	stackloc=4;
+    	fprintf(output_file, "6 0 0 4\n");
+	
+    	fprintf(output_file, "6 0 0 %d\n", decCounter);
 	if(TOKEN == constsym)
 	{
 		while(TOKEN != commasym)
@@ -91,6 +99,14 @@ void BLOCK()
 			GETTOKEN();
 			if(TOKEN != numbersym)
 				ERROR(2);
+			//the register to be used is first available, since this is a const declaration 0 will always be available
+			//I'm unsure of how Consts work in part 2 which may require this to change
+			
+    			fprintf(output_file, "1 0 0 %d\n", TOKEN);
+			fprintf(output_file, "4 0 0 %d\n", stackLoc);
+			stack[stackLoc]=TOKEN;
+			stackLoc++;
+			
 			GETTOKEN();
 		}
 
@@ -123,8 +139,9 @@ void BLOCK()
 
 
 
-		while(TOKEN == procsym)
+		while(TOKEN == procsym)//supposed to be an error so itll be invalid identifier
 		{
+			ERROR(11);//invalid identifier, this code can be here as its unreachable
 			GETTOKEN();
 			if(TOKEN != identsym)
 				ERROR(4);
@@ -147,6 +164,7 @@ void BLOCK()
 
 void STATEMENT()
 {
+	int temp=0;
 	// printf("p%dj",TOKEN);
 	if(TOKEN == identsym)
 	{
@@ -200,6 +218,37 @@ void STATEMENT()
 			ERROR(18);
 		GETTOKEN();
 		STATEMENT();
+	}
+	else if (TOKEN == writesym)
+	{
+	GETTOKEN();
+	if(TOKEN != identsym)
+				ERROR(4);
+				temp=findInStack(variableList[num2);//since num2 says where in the identifier list we're up to its used here
+				if (temp==num2||temp==-1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
+				ERROR(11);
+				//made it here means its legit now we need to tell the vm about it
+				
+				fprintf(output_file, "9 %d 0 1\n", curReg);//write
+				fprintf(output_file, "4 %d 0 %d\n", curReg,temp);//sroe what you wrote
+			num2++;
+			GETTOKEN();
+			STATEMENT();//checks for whatever comes next
+	}
+	else if (TOKEN == readsym)
+	{
+	GETTOKEN();if(TOKEN != identsym)
+				ERROR(4);
+				temp=findInStack(variableList[num2);//since num2 says where in the identifier list we're up to its used here
+				if (temp==num2||temp==-1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
+				ERROR(11);
+				temp=decCounter+4-temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
+				fprintf(output_file, "3 %d 0 %d\n",curReg, temp);//first load into register 
+				fprintf(output_file, "10 %d 0 2\n", curReg);//this instruction is for vm only no more parsers
+			num2++;
+			GETTOKEN();
+			STATEMENT();//whats next
+	
 	}
 	//printf("y%dj",TOKEN);
 	//printf("%d",TOKEN);
@@ -273,7 +322,17 @@ void FACTOR()
 	else
 		ERROR(23);
 }
-
+				
+int findInStack(char MyString[11])
+	{
+		int i=0;
+		
+		for (i=0;i<1000;i++)
+		if (strcmp(MyString,variableList[i])==0)
+			return i;
+	return -1;
+	
+	}
 void ERROR(int errorCase)
 {
     switch (errorCase)
