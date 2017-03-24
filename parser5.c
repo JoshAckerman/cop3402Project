@@ -7,6 +7,7 @@ int newCount = 0;
 char variableList[1000][11];
 int VarNum=0;
 int stack[1000]={0};
+int stackloc=0;
 int num2=0;
 
 //Allows for readability of code
