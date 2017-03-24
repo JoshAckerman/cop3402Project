@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 int TOKEN = 0;
 int tArray[1000];
 int newCount = 0;
@@ -9,10 +9,10 @@ int VarNum=0;
 int stack[1000]={0};
 int registers[16];
 int curReg=0;
-int stackloc=0;
+int stackLoc=0;
 int num2=0;
-int decCounter=0;//when procs are implemented this will become an array with proc number being part 1 
-
+int decCounter=0;//when procs are implemented this will become an array with proc number being part 1
+FILE* output_file;
 //Allows for readability of code
 typedef enum
 {
@@ -23,17 +23,28 @@ typedef enum
     whilesym=25, dosym=26, callsym=27, constsym=28, varsym=29, procsym=30, writesym=31,
     readsym=32, elsesym=33
 } tokenType;
+void GETTOKEN();
+void PROGRAM();
+void BLOCK();
+void STATEMENT();
+void CONDITION();
+void EXPRESSION();
+void TERM();
+void FACTOR();
+int findInStack(char MyString[11]);
+void ERROR(int errorCase);
 
 void main3()
 {
     FILE* file;
     file = fopen("i.txt","r");
-    char* word = (char*)malloc(sizeof(char) * 128);
-    char space[2] = " ";
+    output_file = fopen("output.txt", "w");
+   // char* word = (char*)malloc(sizeof(char) * 128);
+   // char space[2] = " ";
 
     //Gets the information from the file.
-    fgets(word, 128, file);
-    tArray[0] = atoi(strtok(word, space));
+    //fgets(word, 128, file);
+   // tArray[0] = atoi(strtok(word, space));
     //printf("%d\n",tArray[0]);
     int j = 0;
 
@@ -43,14 +54,14 @@ void main3()
         j++;
         //printf("%d\n",tArray[j]);
     }*/
-	while( fscanf(file, "%d", TOKEN) ==1) {
+	while( fscanf(file, "%d", &TOKEN) ==1) {
             tArray[j] = TOKEN;
             if (TOKEN==2)
 			{
 		    decCounter++;
-			memset(&varName, 0, sizeof(varName));//reset unstruction
-			fscanf(file, "%s", varName);
-			strcpy(variableList[VarNum], varName);
+			//memset(&varName, 0, sizeof(varName));//reset unstruction
+			fscanf(file, "%s", variableList[VarNum]);
+			//strcpy(variableList[VarNum], varName);
 			VarNum++;
 			}
 			j++;
@@ -75,14 +86,14 @@ void PROGRAM()
 	if (TOKEN != periodsym)
 		ERROR(9);
 
-	return 0;
+	return;
 }
 
 void BLOCK()
 {
-	stackloc=4;
+	stackLoc=4;
     	fprintf(output_file, "6 0 0 4\n");
-	
+
     	fprintf(output_file, "6 0 0 %d\n", decCounter);
 	if(TOKEN == constsym)
 	{
@@ -101,12 +112,12 @@ void BLOCK()
 				ERROR(2);
 			//the register to be used is first available, since this is a const declaration 0 will always be available
 			//I'm unsure of how Consts work in part 2 which may require this to change
-			
+
     			fprintf(output_file, "1 0 0 %d\n", TOKEN);
 			fprintf(output_file, "4 0 0 %d\n", stackLoc);
 			stack[stackLoc]=TOKEN;
 			stackLoc++;
-			
+
 			GETTOKEN();
 		}
 
@@ -168,7 +179,7 @@ void STATEMENT()
 	// printf("p%dj",TOKEN);
 	if(TOKEN == identsym)
 	{
-		
+
 		GETTOKEN();
 		if(TOKEN != becomessym)
 			ERROR(13);
@@ -224,11 +235,11 @@ void STATEMENT()
 	GETTOKEN();
 	if(TOKEN != identsym)
 				ERROR(4);
-				temp=findInStack(variableList[num2);//since num2 says where in the identifier list we're up to its used here
+				temp=findInStack(variableList[num2]);//since num2 says where in the identifier list we're up to its used here
 				if (temp==num2||temp==-1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
 				ERROR(11);
 				//made it here means its legit now we need to tell the vm about it
-				
+
 				fprintf(output_file, "9 %d 0 1\n", curReg);//write
 				fprintf(output_file, "4 %d 0 %d\n", curReg,temp);//sroe what you wrote
 			num2++;
@@ -239,16 +250,16 @@ void STATEMENT()
 	{
 	GETTOKEN();if(TOKEN != identsym)
 				ERROR(4);
-				temp=findInStack(variableList[num2);//since num2 says where in the identifier list we're up to its used here
+				temp=findInStack(variableList[num2]);//since num2 says where in the identifier list we're up to its used here
 				if (temp==num2||temp==-1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
 				ERROR(11);
 				temp=decCounter+4-temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
-				fprintf(output_file, "3 %d 0 %d\n",curReg, temp);//first load into register 
+				fprintf(output_file, "3 %d 0 %d\n",curReg, temp);//first load into register
 				fprintf(output_file, "10 %d 0 2\n", curReg);//this instruction is for vm only no more parsers
 			num2++;
 			GETTOKEN();
 			STATEMENT();//whats next
-	
+
 	}
 	//printf("y%dj",TOKEN);
 	//printf("%d",TOKEN);
@@ -305,8 +316,8 @@ void FACTOR()
 {
 	//printf("i%dh",TOKEN);
 	if(TOKEN == identsym)
-		GETTOKEN();
-	num2++:
+		{GETTOKEN();
+	num2++;}
 	else if(TOKEN == numbersym)
 		GETTOKEN();
 	else if(TOKEN == lparentsym)
@@ -322,16 +333,16 @@ void FACTOR()
 	else
 		ERROR(23);
 }
-				
+
 int findInStack(char MyString[11])
 	{
 		int i=0;
-		
+
 		for (i=0;i<1000;i++)
 		if (strcmp(MyString,variableList[i])==0)
 			return i;
 	return -1;
-	
+
 	}
 void ERROR(int errorCase)
 {
