@@ -1,50 +1,158 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-int TOKEN = 0;
+#include <string.h>
+char tempTOKEN [1000];
+int TOKEN=0;
 int tArray[1000];
-int count = 0;
-
-
+int newCount = 0;
+char variableList[1000][11];
+int VarNum=0;
+int pstack[1000];
+int registers[16];
+int curReg=0;
+int stackLoc=0;
+int num2=0;
+int badTOKEN=0;
+int decCounter=0;//when procs are implemented this will become an array with proc number being part 1
+FILE* output_file;
 //Allows for readability of code
 typedef enum
 {
-    nulsym = 1, identsym, numbersym, plussym, minussym,
-    multsym,  slashsym, oddsym, eqlsym, neqsym, lessym, leqsym,
-    gtrsym, geqsym, lparentsym, rparentsym, commasym, semicolonsym,
-    periodsym, becomessym, beginsym, endsym, ifsym, thensym,
-    whilesym, dosym, callsym, constsym, varsym, procsym, writesym,
-    readsym, elsesym
+    nulsym = 1, identsym=2, numbersym=3, plussym=4, minussym=5,
+    multsym=6,  slashsym=7, oddsym=8, eqlsym=9, neqsym=10, lessym=11, leqsym=12,
+    gtrsym=13, geqsym=14, lparentsym=15, rparentsym=16, commasym=17, semicolonsym=18,
+    periodsym=19, becomessym=20, beginsym=21, endsym=22, ifsym=23, thensym=24,
+    whilesym=25, dosym=26, callsym=27, constsym=28, varsym=29, procsym=30, writesym=31,
+    readsym=32, elsesym=33
 } tokenType;
+void GETTOKEN();
+void PROGRAM();
+void BLOCK();
+void STATEMENT();
+void CONDITION();
+void EXPRESSION();
+void TERM();
+void FACTOR();
+int findInStack(char MyString[11]);
+void ERROR(int errorCase);
 
-void main()
+void main3()
 {
     FILE* file;
-    file = fopen("i.txt","r");
-    char* word = (char*)malloc(sizeof(char) * 128);
-    char space[2] = " ";
+    file = fopen("lexemelist.txt","r");
+    output_file = fopen("output.txt", "w");
+    FILE* fs;
+    fs=fopen("symbollist.txt", "w");
+    //This make printing symbol list a lot easier(even though it doesn't look like it).
+    char printToken[35][35];
+    strcpy(printToken[0],"nulsym");
+    strcpy(printToken[1],"identsym");
+    strcpy(printToken[2],"numbersym");
+    strcpy(printToken[3],"plussym");
+    strcpy(printToken[4],"minussym");
+    strcpy(printToken[5],"multsym");
+    strcpy(printToken[6],"slashsym");
+    strcpy(printToken[7],"oddsym");
+    strcpy(printToken[8],"eqlsym");
+    strcpy(printToken[9],"neqsym");
+    strcpy(printToken[10],"lessym");
+    strcpy(printToken[11],"leqsym");
+    strcpy(printToken[12],"gtrsym");
+    strcpy(printToken[13],"geqsym");
+    strcpy(printToken[14],"lparentsym");
+    strcpy(printToken[15],"rparentsym");
+    strcpy(printToken[16],"commasym");
+    strcpy(printToken[17],"semicolonsym");
+    strcpy(printToken[18],"periodsym");
+    strcpy(printToken[19],"becomessym");
+    strcpy(printToken[20],"beginsym");
+    strcpy(printToken[21],"endsym");
+    strcpy(printToken[22],"ifsym");
+    strcpy(printToken[23],"thensym");
+    strcpy(printToken[24],"whilesym");
+    strcpy(printToken[25],"dosym");
+    strcpy(printToken[26],"callsym");
+    strcpy(printToken[27],"constsym");
+    strcpy(printToken[28],"varsym");
+    strcpy(printToken[29],"procsym");
+    strcpy(printToken[30],"writesym");
+    strcpy(printToken[31],"readsym");
+    strcpy(printToken[32],"elsesym");
+
+   // char* word = (char*)malloc(sizeof(char) * 128);
+   // char space[2] = " ";
 
     //Gets the information from the file.
-    fgets(word, 128, file);
-    tArray[0] = atoi(strtok(word, space));
+    //fgets(word, 128, file);
+   // tArray[0] = atoi(strtok(word, space));
     //printf("%d\n",tArray[0]);
-    int j = 1;
+    int j = 0;
 
-    while(fgets(word, 128, file) != NULL)
+   /* while(fgets(word, 128, file) != NULL)
 	{
         tArray[j] = atoi(strtok(word, space));
         j++;
         //printf("%d\n",tArray[j]);
-    }
+    }*/
+	while( fscanf(file, "%d", &TOKEN) ==1) {
 
+            //TOKEN=atoi(tempTOKEN);
+            tArray[j] = TOKEN;
+            //Prints out symbols this if statement won't print if it is a number.
+            if(badTOKEN==0)
+            {
+                fprintf(fs, "%s ", printToken[TOKEN-1]);
+            }
+            else
+            {
+                fprintf(fs, "%d ", TOKEN);
+                badTOKEN=0;
+            }
+            if (TOKEN==2)
+			{
+		    decCounter++;
+			//memset(&varName, 0, sizeof(varName));//reset unstruction
+			fscanf(file, "%s", variableList[VarNum]);
+			fprintf(fs, "%s ", variableList[VarNum]);
+			//strcpy(variableList[VarNum], varName);
+			VarNum++;
+			}
+			if (TOKEN==3)
+			{
+			    badTOKEN=1;
+			}
+			j++;
+    }
+    badTOKEN=0;
     PROGRAM();
 }
 
 void GETTOKEN()
 {
-    TOKEN = tArray[count];
-    //printf("%d\n",count);
-    count++;
+    //This is added because numbers were getting mixed in and I believe that was an error
+    if(badTOKEN==0)
+    {
+        TOKEN = tArray[newCount];
+    }
+    else
+        {
+            //printf("%d",TOKEN);
+            newCount++;
+            TOKEN = tArray[newCount];
+            //printf("%d",TOKEN);
+            //printf("%d",TOKEN);
+            badTOKEN=0;
+            //GETTOKEN();
+            //GETTOKEN();
+            //printf("h%d",TOKEN);
+
+        }
+    if(TOKEN==numbersym)
+    {
+        badTOKEN=1;
+    }
+    //printf("%d\n",newCount);
+    newCount++;
 }
 
 void PROGRAM()
@@ -55,32 +163,48 @@ void PROGRAM()
 	//printf("f");
 
 	if (TOKEN != periodsym)
-		ERROR();
+		ERROR(9);
 
-	return 0;
+	return;
 }
 
 void BLOCK()
 {
+	stackLoc=4;
+    	fprintf(output_file, "6 0 0 4\n");
+
+    	fprintf(output_file, "6 0 0 %d\n", decCounter);
 	if(TOKEN == constsym)
 	{
 		while(TOKEN != commasym)
 		{
 			GETTOKEN();
 			if(TOKEN != identsym)
-				ERROR();
+				ERROR(4);
+			num2++;
 			GETTOKEN();
 			if(TOKEN != eqlsym)
-				ERROR();
+				ERROR(3);
 			//May be wrong
 			GETTOKEN();
 			if(TOKEN != numbersym)
-				ERROR();
+				ERROR(2);
+			//the register to be used is first available, since this is a const declaration 0 will always be available
+			//I'm unsure of how Consts work in part 2 which may require this to change
+
+    			fprintf(output_file, "1 0 0 %d\n", TOKEN);
+			fprintf(output_file, "4 0 0 %d\n", stackLoc);
+			pstack[stackLoc]=TOKEN;
+			stackLoc++;
+
 			GETTOKEN();
 		}
 
 		if(TOKEN != semicolonsym)
-			ERROR();
+        {
+            printf("p");
+			ERROR(5);
+        }
 
 		GETTOKEN();
 	}
@@ -92,61 +216,70 @@ void BLOCK()
 		{
 			GETTOKEN();
 			if(TOKEN != identsym)
-				ERROR();
+				ERROR(4);
+			num2++;
+			//printf("%dh",TOKEN);
 			GETTOKEN();
 			//printf("%dh",TOKEN);
-        }
+        	}
 		while(TOKEN == commasym);
-
 
         if(TOKEN != semicolonsym)
         {
-				ERROR();
+            printf("h");
+				ERROR(5);
         }
+	}
 			//("%d",TOKEN);
         GETTOKEN();
-        
 
 
-		while(TOKEN == procsym)
+
+		while(TOKEN == procsym)//supposed to be an error so itll be invalid identifier
 		{
+			ERROR(11);//invalid identifier, this code can be here as its unreachable
 			GETTOKEN();
 			if(TOKEN != identsym)
-				ERROR();
+				ERROR(4);
+			num2++;
 			GETTOKEN();
 			if(TOKEN != semicolonsym)
-				ERROR();
+				ERROR(5);
 			GETTOKEN();
 			BLOCK();
 			if(TOKEN != semicolonsym)
-				ERROR();
+				ERROR(5);
 			GETTOKEN();
 		}
 
 		//printf("%d",TOKEN);
 		STATEMENT();
 		// printf("j");
-	}
+
 }
 
 void STATEMENT()
 {
+	int temp=0;
 	// printf("p%dj",TOKEN);
 	if(TOKEN == identsym)
 	{
+
 		GETTOKEN();
 		if(TOKEN != becomessym)
-			ERROR();
+			ERROR(13);
 		GETTOKEN();
 		//printf("p%dp",TOKEN);
 		EXPRESSION();
 		//printf("p%dp",TOKEN);
+		num2++;//tells where on the list of string to find current one
 	}
 	else if(TOKEN == callsym)
 	{
 		GETTOKEN();
 		if (TOKEN != identsym)
-			ERROR();
+			ERROR(14);
+		num2++;
 		GETTOKEN();
 	}
     else if(TOKEN == beginsym)
@@ -156,11 +289,16 @@ void STATEMENT()
 		while(TOKEN == semicolonsym)
 		{
 			GETTOKEN();
+
 			STATEMENT();
 		}
+		//printf("%d",TOKEN);
 		//printf("f");
 		if(TOKEN != endsym)
-			ERROR();
+        {
+            //printf("%d",TOKEN);
+			ERROR(8);//I don't know this error code
+        }
 
 		GETTOKEN();
 	}
@@ -169,7 +307,7 @@ void STATEMENT()
 		GETTOKEN();
 		CONDITION();
 		if (TOKEN != thensym)
-			ERROR();
+			ERROR(16);
 		GETTOKEN();
 		STATEMENT();
 	}
@@ -178,9 +316,40 @@ void STATEMENT()
 		GETTOKEN();
 		CONDITION();
 		if(TOKEN != dosym)
-			ERROR();
+			ERROR(18);
 		GETTOKEN();
 		STATEMENT();
+	}
+	else if (TOKEN == writesym)
+	{
+	GETTOKEN();
+	if(TOKEN != identsym)
+				ERROR(4);
+				temp=findInStack(variableList[num2]);//since num2 says where in the identifier list we're up to its used here
+				if (temp==num2||temp==-1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
+				ERROR(11);
+				//made it here means its legit now we need to tell the vm about it
+
+				fprintf(output_file, "9 %d 0 1\n", curReg);//write
+				fprintf(output_file, "4 %d 0 %d\n", curReg,temp);//sroe what you wrote
+			num2++;
+			GETTOKEN();
+			STATEMENT();//checks for whatever comes next
+	}
+	else if (TOKEN == readsym)
+	{
+	GETTOKEN();if(TOKEN != identsym)
+				ERROR(4);
+				temp=findInStack(variableList[num2]);//since num2 says where in the identifier list we're up to its used here
+				if (temp==num2||temp==-1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
+				ERROR(11);
+				temp=decCounter+4-temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
+				fprintf(output_file, "3 %d 0 %d\n",curReg, temp);//first load into register
+				fprintf(output_file, "10 %d 0 2\n", curReg);//this instruction is for vm only no more parsers
+			num2++;
+			GETTOKEN();
+			STATEMENT();//whats next
+
 	}
 	//printf("y%dj",TOKEN);
 	//printf("%d",TOKEN);
@@ -196,18 +365,8 @@ void CONDITION()
 	else
 	{
 		EXPRESSION();
-		if (TOKEN != eqlsym)
-			ERROR();
-		if (TOKEN != neqsym)
-			ERROR();
-		if (TOKEN != lessym)
-			ERROR();
-		if (TOKEN != leqsym)
-			ERROR();
-		if (TOKEN != gtrsym)
-			ERROR();
-		if (TOKEN != geqsym)
-			ERROR();
+		if (TOKEN != eqlsym &&TOKEN != neqsym&&TOKEN != lessym&&TOKEN != leqsym&&TOKEN != gtrsym&&TOKEN != geqsym)
+			ERROR(20);
 		GETTOKEN();
 		EXPRESSION();
 	}
@@ -247,7 +406,8 @@ void FACTOR()
 {
 	//printf("i%dh",TOKEN);
 	if(TOKEN == identsym)
-		GETTOKEN();
+		{GETTOKEN();
+	num2++;}
 	else if(TOKEN == numbersym)
 		GETTOKEN();
 	else if(TOKEN == lparentsym)
@@ -257,13 +417,23 @@ void FACTOR()
         EXPRESSION();
 
         if(TOKEN != rparentsym)
-            ERROR();
+            ERROR(22);
 		GETTOKEN();
     }
 	else
-		ERROR();
+		ERROR(23);
 }
 
+int findInStack(char MyString[11])
+	{
+		int i=0;
+
+		for (i=0;i<1000;i++)
+		if (strcmp(MyString,variableList[i])==0)
+			return i;
+	return -1;
+
+	}
 void ERROR(int errorCase)
 {
     switch (errorCase)
