@@ -218,9 +218,10 @@ void STATEMENT()
 			ERROR(13);
 		GETTOKEN();
 		//printf("p%dp",TOKEN);
+		num2++;//tells where on the list of string to find current one
 		EXPRESSION();
 		//printf("p%dp",TOKEN);
-		num2++;//tells where on the list of string to find current one
+		
 	}
 	else if(TOKEN == callsym)
 	{
