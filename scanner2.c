@@ -1358,6 +1358,7 @@ int main2() {
 
     }
     fclose(fl);
+    fclose(file);
     return 1;
 }
 
