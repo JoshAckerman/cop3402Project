@@ -14,6 +14,8 @@ int curReg = 0;//note this is the current register to store in, if you want last
 int stackLoc = 0;
 int num2 = 0;
 int badTOKEN = 0;
+int negate_flag=0;
+int pc=0;
 int decCounter = 0;//when procs are implemented this will become an array with proc number being part 1
 FILE* output_file;
 
@@ -102,6 +104,7 @@ void main3()
         if(badTOKEN==0)
         {
             fprintf(fs, "%s ", printToken[TOKEN - 1]);
+
         }
         else
         {
@@ -164,8 +167,9 @@ void PROGRAM()
 
 	if (TOKEN != periodsym)
 		ERROR(9);
-	
+
     fprintf(output_file, "11 0 0 3\n");
+	pc++;
     fclose(output_file);
 	return;
 }
@@ -174,8 +178,10 @@ void BLOCK()
 {
 	stackLoc = 4;
     	fprintf(output_file, "6 0 0 4\n");
+		pc++;
 
     fprintf(output_file, "6 0 0 %d\n", decCounter);
+	pc++;
 	if(TOKEN == constsym)
 	{
 		while(TOKEN != commasym)
@@ -195,7 +201,9 @@ void BLOCK()
 			//I'm unsure of how Consts work in part 2 which may require this to change
 
 			fprintf(output_file, "1 0 0 %d\n", TOKEN);
+			pc++;
 			fprintf(output_file, "4 0 0 %d\n", stackLoc);
+			pc++;
 			pstack[stackLoc]=TOKEN;
 			stackLoc++;
 
@@ -279,6 +287,7 @@ void STATEMENT()
 
 		curReg--;//always implemented before reaching here so it must always be decremented
 		fprintf(output_file, "4 %d 0 %d\n", curReg, whereAmI);
+		pc++;
 		temp = 0;
 		STATEMENT();
 		//printf("p%dp",TOKEN);
@@ -340,7 +349,9 @@ void STATEMENT()
 		//made it here means its legit now we need to tell the vm about it
 
 		fprintf(output_file, "9 %d 0 1\n", curReg);//write
+		pc++;
 		fprintf(output_file, "4 %d 0 %d\n", curReg,temp);//sroe what you wrote
+		pc++;
 		num2++;
 		GETTOKEN();
 		STATEMENT();//checks for whatever comes next
@@ -355,7 +366,9 @@ void STATEMENT()
 			ERROR(11);
 		temp = decCounter + 4 - temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
 		fprintf(output_file, "3 %d 0 %d\n", curReg, temp);//first load into register
+		pc++;
 		fprintf(output_file, "10 %d 0 2\n", curReg);//this instruction is for vm only no more parsers
+		pc++;
 		num2++;
 		GETTOKEN();
 		STATEMENT();//whats next
@@ -373,6 +386,7 @@ void CONDITION()
 		EXPRESSION();//gets the first number
 		curReg--;
 		fprintf(output_file, "17 %d %d 0\n", curReg, curReg);//this says odd it not positive on this one esp format
+	pc++;
 	}
 	else
 	{
@@ -385,6 +399,7 @@ void CONDITION()
 		curReg--;
 		temp = temp + 10;
 		fprintf(output_file, "%d %d %d %d\n", temp, (curReg - 1), (curReg - 1), curReg);//you can pretty much always store it in the first register used
+		pc++;
 		//anyway you take the token (stored in temp as it moved on ) add 10 and you get the call value, use it and the registers determined in expression to get here
 		temp=0;
 		//fprintf(output_file, "%d %d %d %d\n", temp, (curReg-1), (curReg-1), curReg);// not sure what else goes here, maybe used for a jump
@@ -400,35 +415,49 @@ void EXPRESSION()
 		GETTOKEN();
 		temp=TOKEN;
 	}
+	if(TOKEN == minussym&&(tArray[TOKEN-1]!=2&&tArray[TOKEN-2]!=3))//this means its a negation, set a flag to mark it and after it reads the next variable we can negate thator whatevers in the parenthesis
+	{
+		negate_flag =1;
+		GETTOKEN();
+	}
 
-	if(TOKEN == minussym)//needs attention in case of negations otherwise i wouldve combined this into the while loop
+	else if(TOKEN == minussym)//needs attention in case of negations otherwise i wouldve combined this into the while loop
 	{
 		GETTOKEN();
 		temp=TOKEN;
 	}
 
 	TERM();
-	
+
 	if(temp > 0)
     {
         curReg--;
         temp = temp + 9;//this gives the appropriate value for the first number, add instruction is 13 subtract 14, token values are 4 and 5 respectively
         fprintf(output_file, "%d %d %d %d\n", temp, (curReg - 1), (curReg - 1), curReg);//1st is add or sub, second is where to store, 3rd is 1st value, 4th is 2nd value
-        temp = 0;
+        pc++;
+		temp = 0;
         curReg--; //the last value is now meaningless as it
     }
 
 	while(TOKEN == plussym || TOKEN == minussym)
 	{
+	    if(TOKEN == minussym&&(tArray[TOKEN-1]!=2&&tArray[TOKEN-2]!=3))//this means its a negation, set a flag to mark it and after it reads the next variable we can negate thator whatevers in the parenthesis
+	{
+		negate_flag =1;
+		GETTOKEN();
+	}
+	else{
 	    temp = TOKEN + 9;
 		GETTOKEN();
 		TERM();
 		curReg--;
         temp = temp + 9;//this gives the appropriate value for the first number, add instruction is 13 subtract 14, token values are 4 and 5 respectively
         fprintf(output_file, "%d %d %d %d\n", temp,(curReg-1),(curReg-1),curReg);//1st is add or sub, second is where to store, 3rd is 1st value, 4th is 2nd value
-        temp = 0;
+
+		pc++;
+		temp = 0;
         curReg--; //the last value is now meaningless as it was just to store that 1value
-	}
+	}}
 	if(TOKEN == multsym || TOKEN == slashsym)//order of operations could have issues
         TERM();
 }
@@ -448,11 +477,12 @@ void TERM()
 			curReg--;
 			temp = temp + 9;//this gives the appropriate value for the first number, mult instruction is 15 div 16, token values are 6 and 7 respectively
 			fprintf(output_file, "%d %d %d %d\n", temp,(curReg-1),(curReg-1),curReg);//1st is mult or div, second is where to store, 3rd is 1st value, 4th is 2nd value
+			pc++;
 			temp = 0;//clear temp
 			curReg--; //the last value is now meaningless as it was just to store that 1 value
 		}
-		
-		if (TOKEN == plussym || TOKEN == minussym)//order of operations could have issues
+
+		if (TOKEN == plussym || TOKEN == minussym)//order of operations could have issuesif negation this would send it where it needs to be
 			EXPRESSION();
 	}
 	else
@@ -476,6 +506,14 @@ void FACTOR()
 		 if ((whereAmI2-4)==num2)
             ERROR(11);
 	    fprintf(output_file, "3 %d 0 %d\n", curReg, whereAmI2);//load whatever new value into the register or say we did that works too
+pc++;
+	   if (negate_flag==1)//if negation then turn the register that was just loaded (i.e.the one its about, negative
+	{
+	negate_flag=0;
+	fprintf(output_file, "12 %d %d 0\n", curReg, curReg);
+	pc++;
+
+	}
 	    curReg++;
 		//}
 		num2++;
@@ -488,12 +526,20 @@ void FACTOR()
 	    //if num2=whereAmI-4 send back an error, depends on how often we're checking idents for individual vs function
 	    //whereAmI2=findInStack(num2)+4;//needs to be checked for initialization
 	    fprintf(output_file, "1 %d 0 %d\n", curReg, TOKEN);
+		pc++;
 	    curReg++;//TOKEN value doesn't need to be saved in this program thats for the vm
 	    //fprintf(output_file, "4 %d 0 %d\n", curReg, whereAmI);
 	}
 
 	else if(TOKEN == lparentsym)
     {
+        int temp=0;
+        if (negate_flag==1)//if negate is 1 going into parenthesis itll just negate the 1st variable it sees
+        {
+            negate_flag=0;
+            temp=1;
+        }
+
         while(TOKEN != rparentsym)//this can have more than 3 tokens inside so its necesary to keep going to get everything
 		{
 			GETTOKEN();
@@ -501,7 +547,13 @@ void FACTOR()
 			if(TOKEN > 7)//this can only be numbers symbols or equation materials anything else gets caught here since its number >7
 				ERROR(22);
 		}
-		
+    if (temp==1)//its possible to get here with a negation active
+	{
+	negate_flag=0;
+	temp=0;
+	fprintf(output_file, "12 %d %d 0\n", curReg, curReg);//this will still be the most recent register to contain anything so anything to be negated would be here
+pc++;
+	}
 		GETTOKEN();
     }
 	else
@@ -600,22 +652,22 @@ void ERROR(int errorCase)
         default:
             break;
     }
-	
+
     FILE* fw;
     fw = fopen("instruction.txt", "r");
     char string[100];
     int length = 0;
-	
+
     while(fscanf(fw, "%s", &string) == 1)
 	{
         length = strlen(string);
         printf("%s",string);
-		
+
         if(string[length - 1] == ';')
         {
             printf("\n");
         }
-		
+
         if(strcmp("begin", string) == 0)
         {
             printf("\n ");
@@ -624,7 +676,7 @@ void ERROR(int errorCase)
 		//TOKEN=atoi(tempTOKEN);
 		//tArray[j] = TOKEN;
 		//Prints out symbols this if statement won't print if it is a number.
-		
+
 		if(badTOKEN == 0)
 		{
 			//fprintf(fs, "%s ", printToken[TOKEN-1]);
@@ -634,7 +686,7 @@ void ERROR(int errorCase)
 			//fprintf(fs, "%d ", TOKEN);
 			badTOKEN = 0;
 		}
-		
+
 		if (TOKEN == 2)
 		{
 			decCounter++;
@@ -645,7 +697,7 @@ void ERROR(int errorCase)
 			//strcpy(variableList[VarNum], varName);
 			VarNum++;
 		}
-		
+
 		if (TOKEN == 3)
 		{
 			badTOKEN = 1;
