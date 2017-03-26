@@ -313,19 +313,30 @@ void STATEMENT()
 }
 
 void CONDITION()
-{
+{ int temp=0;
 	if(TOKEN == oddsym)
 	{
 		GETTOKEN();
-		EXPRESSION();
+		EXPRESSION();//gets the first number
+		curReg--;
+				fprintf(output_file, "17 %d %d 0\n", curReg, curReg);//this says odd it not positive on this one esp format
+
 	}
 	else
 	{
 		EXPRESSION();
 		if (TOKEN != eqlsym &&TOKEN != neqsym&&TOKEN != lessym&&TOKEN != leqsym&&TOKEN != gtrsym&&TOKEN != geqsym)
 			ERROR(20);
+			temp=TOKEN;
 		GETTOKEN();
 		EXPRESSION();
+		curReg--;
+		temp=temp+10;
+		fprintf(output_file, "%d %d %d %d\n", temp, (curReg-1), (curReg-1), curReg);//you can pretty much always store it in the first register used
+    //anyway you take the token (stored in temp as it moved on ) add 10 and you get the call value, use it and the registers determined in expression to get here
+		temp=0;
+		//fprintf(output_file, "%d %d %d %d\n", temp, (curReg-1), (curReg-1), curReg);// not sure what else goes here, maybe used for a jump
+
 	}
 }
 
