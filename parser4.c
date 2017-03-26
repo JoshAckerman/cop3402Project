@@ -327,7 +327,15 @@ void STATEMENT()
 		if (TOKEN != thensym)
 			ERROR(16);
 		GETTOKEN();
-		STATEMENT();
+		fprintf(output_file, "1 %d 0 1\n", (curReg+1));//load 1 into the register
+			pc++;
+		fprintf(output_file, "14 %d 0 %d\n", curReg, curReg, (curReg+1));//subtract 1 so the answer should be at 0
+			pc++;
+		fprintf(output_file, "8 %d 0 %d\n", curReg, (pc+2));//jump past the jump that skips this part of the code
+			pc++;
+		fprintf(output_file, "7 0 0 %d\n", curReg, (pc+4));//skip past this partof the code as if is not met
+			pc++;
+		EXPRESSION();
 	}
 	else if (TOKEN == whilesym)
 	{
@@ -336,7 +344,19 @@ void STATEMENT()
 		if(TOKEN != dosym)
 			ERROR(18);
 		GETTOKEN();
-		STATEMENT();
+		fprintf(output_file, "1 %d 0 1\n", (curReg+1));//load 1 into the register
+                pc++;
+            fprintf(output_file, "14 %d 0 %d\n", curReg, curReg, (curReg+1));//subtract 1 so the answer should be at 0
+                pc++;
+            fprintf(output_file, "8 %d 0 %d\n", curReg, (pc+2));//jump past the jump that skips this part of the code
+                pc++;
+            fprintf(output_file, "7 0 0 %d\n", curReg, (pc+5));//skip past this partof the code as if is not met
+                pc++;
+		EXPRESSION();//statement will loop right by when we implement proc this will cause issues.
+		fprintf(output_file, "7 0 0 %d\n", curReg, (pc-7));//needs to go back to the original while condition you go up 5 for the jump and 4 lines
+		//then up another 1 for the jpc another1 for the subtraction and another 1 for the load 1 to subtract finally your at the original comparison i think its 1 off
+		//maybe a few need someone to double check this math it seems sketchy
+		//STATEMENT();
 	}
 	else if (TOKEN == writesym)
 	{
