@@ -473,6 +473,8 @@ void FACTOR()
 	    //make sure this isn't first time seeing this varaible create checker class or just
 	    //if num2=whereAmI-4 send back an error, depends on how often we're checking idents for individual vs function
 	    whereAmI2 = findInStack(variableList[num2]) + 4;//needs to be checked for initialization
+		 if ((whereAmI2-4)==num2)
+            ERROR(11);
 	    fprintf(output_file, "3 %d 0 %d\n", curReg, whereAmI2);//load whatever new value into the register or say we did that works too
 	    curReg++;
 		//}
