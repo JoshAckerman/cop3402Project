@@ -277,7 +277,7 @@ void STATEMENT()
 		curReg--;//always implemented before reaching here so it must always be decremented
 		 fprintf(output_file, "4 %d 0 %d\n", curReg, whereAmI);
 		 temp=0;
-
+STATEMENT();
 		//printf("p%dp",TOKEN);
 		//num2++;//tells where on the list of string to find current one
 	}
