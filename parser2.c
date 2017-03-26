@@ -9,7 +9,7 @@ char variableList[1000][11];
 int VarNum=0;
 int pstack[1000];
 int registers[16];
-int curReg=0;
+int curReg=0;//note this is the current register to store in, if you want last register with an item in it curReg-1
 int stackLoc=0;
 int num2=0;
 int badTOKEN=0;
@@ -209,6 +209,7 @@ void BLOCK()
 void STATEMENT()
 {
 	int temp=0;
+	int whereAmI=0;
 	// printf("p%dj",TOKEN);
 	if(TOKEN == identsym)
 	{
@@ -218,10 +219,17 @@ void STATEMENT()
 			ERROR(13);
 		GETTOKEN();
 		//printf("p%dp",TOKEN);
+		temp=num2;
 		num2++;//tells where on the list of string to find current one
 		EXPRESSION();
+		whereAmI=findInStack(variableList[(temp)])+4;//needs legitamacy check
+
+		curReg--;//always implemented before reaching here so it must always be decremented
+		 fprintf(output_file, "4 %d 0 %d\n", curReg, whereAmI);
+		 temp=0;
+
 		//printf("p%dp",TOKEN);
-		
+		//num2++;//tells where on the list of string to find current one
 	}
 	else if(TOKEN == callsym)
 	{
@@ -322,52 +330,113 @@ void CONDITION()
 }
 
 void EXPRESSION()
-{
+{ int temp=0;
+
 	//printf("h%dh",TOKEN);
 	if(TOKEN == plussym)
-		GETTOKEN();
+		{GETTOKEN();
+		temp=TOKEN;
+		}
 
-	if(TOKEN == minussym)
-		GETTOKEN();
+	if(TOKEN == minussym)//needs attention in case of negations otherwise i wouldve combined this into the while loop
+		{GETTOKEN();
+		temp=TOKEN;
+		}
 
 	TERM();
+	if (temp>0)
+    {
+        curReg--;
+        temp=temp+9;//this gives the appropriate value for the first number, add instruction is 13 subtract 14, token values are 4 and 5 respectively
+       fprintf(output_file, "%d %d %d %d\n", temp,(curReg-1),(curReg-1),curReg);//1st is add or sub, second is where to store, 3rd is 1st value, 4th is 2nd value
+       temp=0;
+       curReg--; //the last value is now meaningless as it
+
+    }
 
 	while(TOKEN == plussym || TOKEN == minussym)
 	{
+	    temp=TOKEN+9;
 		GETTOKEN();
 		TERM();
+		curReg--;
+        temp=temp+9;//this gives the appropriate value for the first number, add instruction is 13 subtract 14, token values are 4 and 5 respectively
+       fprintf(output_file, "%d %d %d %d\n", temp,(curReg-1),(curReg-1),curReg);//1st is add or sub, second is where to store, 3rd is 1st value, 4th is 2nd value
+       temp=0;
+       curReg--; //the last value is now meaningless as it was just to store that 1value
 	}
+	if(TOKEN == multsym ||TOKEN == slashsym)//order of operations could have issues
+        TERM();
 }
 
 void TERM()
-{
+{ int temp=0;
 	//printf("g%dp",TOKEN);
 	if(TOKEN == multsym ||TOKEN == slashsym){
 	while(TOKEN == multsym ||TOKEN == slashsym)
-	{
+	{temp=TOKEN+9;
+
 		GETTOKEN();
 		FACTOR();
-	}}
-	else 
+		curReg--;
+        temp=temp+9;//this gives the appropriate value for the first number, mult instruction is 15 div 16, token values are 6 and 7 respectively
+       fprintf(output_file, "%d %d %d %d\n", temp,(curReg-1),(curReg-1),curReg);//1st is mult or div, second is where to store, 3rd is 1st value, 4th is 2nd value
+       temp=0;//clear temp
+       curReg--; //the last value is now meaningless as it was just to store that 1 value
+	}
+
+	if (TOKEN == plussym || TOKEN == minussym)//order of operations could have issues
+        EXPRESSION();
+
+	}
+	else
 	FACTOR();
 }
 
 void FACTOR()
 {
+    int whereAmI=0;
+    int whereAmI2=0;
 	//printf("i%dh",TOKEN);
 	if(TOKEN == identsym)
-		{GETTOKEN();
+		{GETTOKEN();//pretty much just saying move on
+		//if(tArray[newCount-1]==20&&tArray[newCount+1]>3&&tArray[newCount+1]<8)//previous is assignment next isn't a pemdas this is a 1off spot
+	//{
+	    //whereAmI=findInStack(variableList[(num2-1)])+4;
+	    //make sure this isn't first time seeing this varaible create checker class or just
+	    //if num2=whereAmI-4 send back an error, depends on how often we're checking idents for individual vs function
+	    whereAmI2=findInStack(variableList[num2])+4;//needs to be checked for initialization
+	    fprintf(output_file, "3 %d 0 %d\n", curReg, whereAmI2);//load whatever new value into the register or say we did that works too
+	   curReg++;
+
+	//}
+
+
+
 	num2++;}
 	else if(TOKEN == numbersym)
-		GETTOKEN();
+		{GETTOKEN();//get the number
+
+	   // whereAmI=findInStack(variableList[(num2-1)])+4;//make sure this isn't first time seeing this varaible create checker class or just
+	    //if num2=whereAmI-4 send back an error, depends on how often we're checking idents for individual vs function
+	    //whereAmI2=findInStack(num2)+4;//needs to be checked for initialization
+	    fprintf(output_file, "1 %d 0 %d\n", curReg, TOKEN);
+	    curReg++;//TOKEN value doesn't need to be saved in this program thats for the vm
+	    //fprintf(output_file, "4 %d 0 %d\n", curReg, whereAmI);
+
+
+
+		}
+
 	else if(TOKEN == lparentsym)
     {
-		GETTOKEN();
+        while(TOKEN != rparentsym)//this can have more than 3 tokens inside so its necesary to keep going to get everything
+		{GETTOKEN();
 
         EXPRESSION();
 
-        if(TOKEN != rparentsym)
-            ERROR(22);
+        if(TOKEN > 7)//this can only be numbers symbols or equation materials anything else gets caught here since its number >7
+            ERROR(22);}
 		GETTOKEN();
     }
 	else
