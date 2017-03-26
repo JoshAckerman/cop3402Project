@@ -342,13 +342,14 @@ void EXPRESSION()
 void TERM()
 {
 	//printf("g%dp",TOKEN);
-	FACTOR();
-
+	if(TOKEN == multsym ||TOKEN == slashsym){
 	while(TOKEN == multsym ||TOKEN == slashsym)
 	{
 		GETTOKEN();
 		FACTOR();
-	}
+	}}
+	else 
+	FACTOR();
 }
 
 void FACTOR()
