@@ -383,6 +383,21 @@ void main1(int printVM)
 
         //printf("c");
     }
+fclose(fw);
+if(printVM==1)
+    {
+    fw = fopen("finaloutput.txt","r");
+    char string[100];
+    int length=0;
+printf("\n");
+    while(fgets(string, 128, fw) != NULL) {
+            //length=strlen(string);
+//printf("d");
+            printf("%s ",string);
+
+//			j++;
+    }
+}
 
     return 0;
 }
