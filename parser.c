@@ -239,7 +239,7 @@ void BLOCK()
 
 		if(TOKEN != semicolonsym)
         {
-            printf("p");
+            //printf("p");
 			ERROR(5);
         }
 
@@ -263,7 +263,7 @@ void BLOCK()
 
         if(TOKEN != semicolonsym)
         {
-            printf("h");
+            //printf("h");
 			ERROR(5);
         }
 	}
