@@ -701,7 +701,7 @@ void ERROR(int errorCase)
     }
 
     FILE* fw;
-    fw = fopen("instruction.txt", "r");
+    fw = fopen("cleaninput.txt", "r");
     char string[100];
     int length = 0;
 
