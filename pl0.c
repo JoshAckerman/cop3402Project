@@ -1,4 +1,3 @@
-//This is the virtual machine.
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,9 +14,9 @@ int rHelp[MAX_CODE_LENGTH]; //Takes in all the registers.
 int count=1;
 int stack[MAX_STACK_HEIGHT];
 int stackDiv[MAX_STACK_HEIGHT];
-int sp = 0, bp = 1, pc = 0, ir  = 0, divCount=0;
+int sp = 0, bp = 1, vpc = 0, ir  = 0, divCount=0;
 
-void main1()
+void main1(int printVM)
 {
     stack[1] =0;
     stack[2] =0;
@@ -26,14 +25,14 @@ void main1()
 //    printf("c");
     read();
     FILE* fw;
-    fw=fopen("output.txt","w");
+    fw=fopen("finaloutput.txt","w");
     fprintf(fw, "Line OP  R   L   M\n");
     int i=0, change=0;
     char word[3];
     for(i=0; i<count; i++)
     {
         //fprintf(fw, "%4d", i);
-        //printf("%d\n", op[i])
+        //printf("%d\n", op[i]);
         if(op[i]==1)
         {
             strcpy(word, "lit");
@@ -151,7 +150,7 @@ void main1()
             stackDiv[divCount-1]=10000000;
             divCount--;
             //fprintf(fw,"\n%d", pc);
-            if(pc<=0)
+            if(vpc<=0)
             {
                 halt=1;
             }
@@ -242,10 +241,10 @@ void main1()
         }
         else
         {
-            printf("tERROR");
+            printf("ERROR");
         }
         //if(ir==0)
-        pc++;
+        vpc++;
         if(op[i]==1)
         {
             strcpy(word, "lit");
@@ -336,12 +335,12 @@ void main1()
         if(ir==1)
         {
             sp--;
-            fprintf(fw, "%4d %3s %3d %3d   %d  %d  %d  %d  ", i, word, rHelp[i], l[i], m[i], pc, bp, sp);
+            fprintf(fw, "%4d %3s %3d %3d   %d  %d  %d  %d  ", i, word, rHelp[i], l[i], m[i], vpc, bp, sp);
             sp++;
         }
         else
         {
-            fprintf(fw, "%4d %3s %3d %3d   %d  %d  %d  %d  ", i, word, rHelp[i], l[i], m[i], pc, bp, sp);
+            fprintf(fw, "%4d %3s %3d %3d   %d  %d  %d  %d  ", i, word, rHelp[i], l[i], m[i], vpc, bp, sp);
         }
         //printf("%d", sp);
         int j=0, tempDiv=0, breakIt=0;
@@ -390,7 +389,7 @@ void main1()
 void read()
 {
     FILE* file;
-    file=fopen("input.txt","r");
+    file=fopen("output.txt","r");
 
     char* word = (char*)malloc(sizeof(char)*128);
     char space[2] = " ";
@@ -457,15 +456,15 @@ int rtn()
 {
     sp=bp-1;
     bp=stack[sp+3];
-    pc=stack[sp+4]-1;
+    vpc=stack[sp+4]-1;
     sp++;
-    if(pc<=0)
+    if(vpc<=0)
     {
         //pc++;
         //sp--;
         ir=1;
     }
-    return pc;
+    return vpc;
     //printf("H%dH", sp+4);
     //printf("%d", stack[sp+4]);
 }
@@ -482,22 +481,22 @@ int cal(int i)
     stack[sp+1]=0;
     stack[sp+2]=base(l[i], bp);
     stack[sp+3]=bp;
-    stack[sp+4]=pc+1;
+    stack[sp+4]=vpc+1;
     bp=sp+1;
-    pc=m[i]-1;
-    return pc;
+    vpc=m[i]-1;
+    return vpc;
 }
 int jmp(int i)
 {
-    pc=m[i]-1;
-    return pc;
+    vpc=m[i]-1;
+    return vpc;
 }
 int jpc(int temp, int i)
 {
     if(r[temp]==0)
     {
-        pc=m[i]-1;
-        return pc;
+        vpc=m[i]-1;
+        return vpc;
     }
     else{
         return 0;
