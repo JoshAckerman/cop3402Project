@@ -543,7 +543,8 @@ pc++;
 	else if(TOKEN == numbersym)
 	{
 		GETTOKEN();//get the number
-
+		if ((TOKEN/100,000)!=0)
+            ERROR(25);
 	    //whereAmI=findInStack(variableList[(num2-1)])+4;//make sure this isn't first time seeing this varaible create checker class or just
 	    //if num2=whereAmI-4 send back an error, depends on how often we're checking idents for individual vs function
 	    //whereAmI2=findInStack(num2)+4;//needs to be checked for initialization
