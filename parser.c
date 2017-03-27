@@ -411,7 +411,7 @@ void STATEMENT()
 		temp = findInStack(variableList[num2]);//since num2 says where in the identifier list we're up to its used here
 		if (temp == num2 || temp == -1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
 			ERROR(11);
-		temp = decCounter + 4 - temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
+		temp = decCounter + 3 - temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
 		fprintf(output_file, "10 %d 0 2\n", curReg);//this instruction is for vm only no more parsers
 		pc++;
 		fprintf(output_file, "4 %d 0 %d\n", curReg, temp);//first load into register
