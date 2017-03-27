@@ -115,6 +115,7 @@ void main3(int printParser)
         }
         if(TOKEN == 2)
 		{
+		 if (tArray[j-1]==17||tArray[j-1]==28||tArray[j-1]==29)
 			decCounter++;
 			//memset(&varName, 0, sizeof(varName));//reset unstruction
 			fscanf(file, "%s", variableList[VarNum]);
