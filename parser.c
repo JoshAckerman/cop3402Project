@@ -166,7 +166,7 @@ void GETTOKEN()
     else
     {
 		//printf("%d",TOKEN);
-		newCount++;
+		//newCount++;
 		TOKEN = tArray[newCount];
 		//printf("%d",TOKEN);
 		//printf("%d",TOKEN);
@@ -575,6 +575,7 @@ pc++;
 	    //whereAmI2=findInStack(num2)+4;//needs to be checked for initialization
 	    fprintf(output_file, "1 %d 0 %d\n", curReg, TOKEN);
 		pc++;
+		GETTOKEN();
 	    curReg++;//TOKEN value doesn't need to be saved in this program thats for the vm
 	    //fprintf(output_file, "4 %d 0 %d\n", curReg, whereAmI);
 	}
