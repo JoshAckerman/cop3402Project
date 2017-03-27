@@ -152,7 +152,7 @@ printf("\n");
 
 fclose(output_file);
 }
-
+printf("No errors, program is syntactically correct");
 }
 
 void GETTOKEN()
