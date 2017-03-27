@@ -397,8 +397,8 @@ void STATEMENT()
 
 		fprintf(output_file, "9 %d 0 1\n", curReg);//write
 		pc++;
-		fprintf(output_file, "4 %d 0 %d\n", curReg,temp);//sroe what you wrote
-		pc++;
+		//fprintf(output_file, "4 %d 0 %d\n", curReg,temp);//sroe what you wrote
+		//pc++;
 		num2++;
 		GETTOKEN();
 		STATEMENT();//checks for whatever comes next
@@ -412,9 +412,9 @@ void STATEMENT()
 		if (temp == num2 || temp == -1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
 			ERROR(11);
 		temp = decCounter + 4 - temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
-		fprintf(output_file, "3 %d 0 %d\n", curReg, temp);//first load into register
-		pc++;
 		fprintf(output_file, "10 %d 0 2\n", curReg);//this instruction is for vm only no more parsers
+		pc++;
+		fprintf(output_file, "4 %d 0 %d\n", curReg, temp);//first load into register
 		pc++;
 		num2++;
 		GETTOKEN();
