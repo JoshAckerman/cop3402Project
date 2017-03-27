@@ -30,4 +30,5 @@ requested all the way back in the scanner. it stores the result of this in its o
 
  READ THIS
 in order to do this use the instructions gcc -o d pl0compiler2.c (where d is whatever you want)
-afterwards use ./d -l -a -v in order to run everything, -l shows scanner, -a parser and -v vm
+afterwards use ./d -l -a -v in order to run everything, -l shows scanner, -a parser and -v vm.
+Make sure to check out input, finaloutput, output, and lexemelist text files.
