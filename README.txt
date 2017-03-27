@@ -1,3 +1,8 @@
+HW3 Parsecodegen by Josh Ackerman
+		    Scott Mosher
+		    Steven Campbell
+      
+      
 To start the program you have to have an input that follows the rules of assignment 2 which
  goes into the scanner, if there are any constants they must be declared 1st with their initial value, 
 next declare variables before begining the program,you can declare up to 500 variables which begin with 
@@ -22,5 +27,7 @@ the code is stored in a new file where the pm0 machine picks it up
 the pm0 machine takes assembly given out by the parser and uses it to do the actions originally 
 requested all the way back in the scanner. it stores the result of this in its own outputfile
 
+
+ READ THIS
 in order to do this use the instructions gcc -o d pl0compiler2.c (where d is whatever you want)
 afterwards use ./d -l -a -v in order to run everything, -l shows scanner, -a parser and -v vm
