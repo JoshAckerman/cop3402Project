@@ -48,7 +48,7 @@ void main3(int printParser)
 {
     FILE* file;
     file = fopen("lexemelist.txt","r");
-    output_file = fopen("output.txt", "w");
+
     // char* word = (char*)malloc(sizeof(char) * 128);
     // char space[2] = " ";
     FILE* fs;
@@ -151,6 +151,8 @@ printf("\n");
 
 //			j++;
     }
+    fclose(output_file);
+    output_file = fopen("output.txt", "w");
 int i=0;
 for (i=0;i<1000;i++)
 
@@ -287,7 +289,7 @@ void BLOCK()
 
 	while(TOKEN == procsym)//supposed to be an error so itll be invalid identifier
 	{
-		ERROR(11);//invalid identifier, this code can be here as its unreachable
+		//ERROR(11);//invalid identifier, this code can be here as its unreachable
 		GETTOKEN();
 		if(TOKEN != identsym)
 			ERROR(4);
@@ -459,6 +461,7 @@ void STATEMENT()
 
 void CONDITION()
 {
+    printf("o%do",TOKEN);
 	int temp=0;
 	if(TOKEN == oddsym)
 	{
@@ -489,7 +492,7 @@ void CONDITION()
 void EXPRESSION()
 {
 	int temp=0;
-	//printf("h%dh",TOKEN);
+	printf("h%dh",TOKEN);
 	if(TOKEN == plussym)
 	{
 		GETTOKEN();
@@ -545,7 +548,7 @@ void EXPRESSION()
 void TERM()
 {
 	int temp = 0;
-	//printf("g%dp",TOKEN);
+	printf("g%dp",TOKEN);
 	if(TOKEN == multsym || TOKEN == slashsym)
 	{
 		while(TOKEN == multsym || TOKEN == slashsym)
@@ -573,7 +576,7 @@ void FACTOR()
 {
     int whereAmI = 0;
     int whereAmI2 = 0;
-	//printf("i%dh",TOKEN);
+	printf("i%dh",TOKEN);
 	if(TOKEN == identsym)
 	{
 		GETTOKEN();//pretty much just saying move on
@@ -601,6 +604,7 @@ pc++;
 	else if(TOKEN == numbersym)
 	{
 		GETTOKEN();//get the number
+		printf("t%dt", TOKEN);
 	if ((TOKEN/100,000)!=0)
             ERROR(25);
 	    //whereAmI=findInStack(variableList[(num2-1)])+4;//make sure this isn't first time seeing this varaible create checker class or just
@@ -609,6 +613,7 @@ pc++;
 	    sprintf(PrintmaStack[pc], "1 %d 0 %d\n", curReg, TOKEN);
 		pc++;
 		GETTOKEN();
+		printf("g%dg",TOKEN);
 	    curReg++;//TOKEN value doesn't need to be saved in this program thats for the vm
 	    //sprintf(PrintmaStack[pc], "4 %d 0 %d\n", curReg, whereAmI);
 	}
@@ -638,8 +643,10 @@ pc++;
 	}
 		GETTOKEN();
     }
-	else
+	else{
+            printf("%d",TOKEN);
 		ERROR(23);
+	}
 }
 
 int findInStack(char MyString[11])
