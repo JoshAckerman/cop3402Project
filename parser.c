@@ -9,6 +9,7 @@ int TOKEN = 0;
 int tArray[1000];
 int newCount = 0;
 char variableList[1000][11];
+char PrintmaStack[1000][20];
 int VarNum = 0;
 int pstack[1000];
 int registers[16];
@@ -150,6 +151,18 @@ printf("\n");
 
 //			j++;
     }
+int i=0;
+for (i=0;i<1000;i++)
+
+{
+    if (PrintmaStack[i]==0)//since printmaStack ismade of chars this would mean a null
+    {
+        break;//it should be impossible to get past printmaStacks current value, i.e. no value should be blank
+    }
+    fprintf(output_file, PrintmaStack[i]);
+}
+
+
 
 fclose(output_file);
 }
@@ -194,7 +207,7 @@ void PROGRAM()
 	if (TOKEN != periodsym)
 		ERROR(9);
 
-    fprintf(output_file, "11 0 0 3\n");
+    sprintf(PrintmaStack[pc], "11 0 0 3\n");
 	pc++;
     fclose(output_file);
 
@@ -204,10 +217,10 @@ void PROGRAM()
 void BLOCK()
 {
 	stackLoc = 4;
-    	fprintf(output_file, "6 0 0 4\n");
+    	sprintf(PrintmaStack[pc], "6 0 0 4\n");
 		pc++;
 
-    fprintf(output_file, "6 0 0 %d\n", decCounter);
+    sprintf(PrintmaStack[pc], "6 0 0 %d\n", decCounter);
 	pc++;
 	if(TOKEN == constsym)
 	{
@@ -227,9 +240,9 @@ void BLOCK()
 			//the register to be used is first available, since this is a const declaration 0 will always be available
 			//I'm unsure of how Consts work in part 2 which may require this to change
 
-			fprintf(output_file, "1 0 0 %d\n", TOKEN);
+			sprintf(PrintmaStack[pc], "1 0 0 %d\n", TOKEN);
 			pc++;
-			fprintf(output_file, "4 0 0 %d\n", stackLoc);
+			sprintf(PrintmaStack[pc], "4 0 0 %d\n", stackLoc);
 			pc++;
 			pstack[stackLoc]=TOKEN;
 			stackLoc++;
@@ -313,7 +326,7 @@ void STATEMENT()
 		whereAmI = findInStack(variableList[(temp)]) + 4;//needs legitamacy check
 
 		curReg--;//always implemented before reaching here so it must always be decremented
-		fprintf(output_file, "4 %d 0 %d\n", curReg, whereAmI);
+		sprintf(PrintmaStack[pc], "4 %d 0 %d\n", curReg, whereAmI);
 		pc++;
 		temp = 0;
 		STATEMENT();
@@ -349,38 +362,58 @@ void STATEMENT()
 	}
 	else if (TOKEN == ifsym)
 	{
+	    int tempPC2;
+	    int tempPC3;
 		GETTOKEN();
 		CONDITION();
 		if (TOKEN != thensym)
 			ERROR(16);
 		GETTOKEN();
-		fprintf(output_file, "1 %d 0 1\n", (curReg+1));//load 1 into the register
+		sprintf(PrintmaStack[pc], "1 %d 0 1\n", (curReg+1));//load 1 into the register
 			pc++;
-		fprintf(output_file, "14 %d %d %d\n", curReg, curReg, (curReg+1));//subtract 1 so the answer should be at 0
+		sprintf(PrintmaStack[pc], "14 %d %d %d\n", curReg, curReg, (curReg+1));//subtract 1 so the answer should be at 0
 			pc++;
-		fprintf(output_file, "8 %d 0 %d\n", curReg, (pc+2));//jump past the jump that skips this part of the code
+            sprintf(PrintmaStack[pc], "8 %d 0 %d\n", curReg, (pc+2));//jump past the jump that skips this part of the code
 			pc++;
-		fprintf(output_file, "7 0 0 %d\n",  (pc+4));//skip past this partof the code as if is not met
+			tempPC2=pc;
+		sprintf(PrintmaStack[pc], "7 0 0 %d\n",  (pc+4));//skip past this partof the code as if is not met, pc+4 is a holder
 			pc++;
 		EXPRESSION();
+		sprintf(PrintmaStack[tempPC2], "7 0 0 %d\n",  (pc));//skip past this partof the code as if is not met
+		if (TOKEN==elsesym)//else isn't mandatory so this can be skipped
+        {
+
+            sprintf(PrintmaStack[tempPC2], "7 0 0 %d\n",  (pc));//if there's an else change the skip to go to else then add a skip
+            tempPC3=pc;
+            sprintf(PrintmaStack[pc], "7 0 0 %d\n",  (pc));//need to reserve a spot for the jump past the else statement, the %d doesnt matter yet
+            pc++;
+            GETTOKEN();
+            EXPRESSION();
+            sprintf(PrintmaStack[tempPC3], "7 0 0 %d\n",  (pc));//end of the else statement which means this is the spot to jump to, change tempPC3
+        }
 	}
 	else if (TOKEN == whilesym)
-	{
+	{ int tempPC;//creates a local temp variable
+	int tempPC1;
 		GETTOKEN();
+		tempPC1=pc;
 		CONDITION();
 		if(TOKEN != dosym)
 			ERROR(18);
 		GETTOKEN();
-		fprintf(output_file, "1 %d 0 1\n", (curReg+1));//load 1 into the register
+		sprintf(PrintmaStack[pc], "1 %d 0 1\n", (curReg+1));//load 1 into the register
                 pc++;
-            fprintf(output_file, "14 %d %d %d\n", curReg, curReg, (curReg+1));//subtract 1 so the answer should be at 0
+            sprintf(PrintmaStack[pc], "14 %d %d %d\n", curReg, curReg, (curReg+1));//subtract 1 so the answer should be at 0
                 pc++;
-            fprintf(output_file, "8 %d 0 %d\n", curReg, (pc+2));//jump past the jump that skips this part of the code
+            sprintf(PrintmaStack[pc], "8 %d 0 %d\n", curReg, (pc+2));//jump past the jump that skips this part of the code
                 pc++;
-            fprintf(output_file, "7 0 0 %d\n", (pc+5));//skip past this partof the code as if is not met
+                tempPC=pc;
+            sprintf(PrintmaStack[pc], "7 0 0 %d\n", (pc+5));//skip past this partof the code as if is not met
                 pc++;
 		EXPRESSION();//statement will loop right by when we implement proc this will cause issues.
-		fprintf(output_file, "7 0 0 %d\n", (pc-7));//needs to go back to the original while condition you go up 5 for the jump and 4 lines
+		sprintf(PrintmaStack[tempPC], "7 0 0 %d\n", (pc));//changes to the real jump spot
+		sprintf(PrintmaStack[pc], "7 0 0 %d\n", (tempPC1));//needs to go back to the original while condition could be 1 off
+
 		//then up another 1 for the jpc another1 for the subtraction and another 1 for the load 1 to subtract finally your at the original comparison i think its 1 off
 		//maybe a few need someone to double check this math it seems sketchy
 		//STATEMENT();
@@ -395,9 +428,9 @@ void STATEMENT()
 			ERROR(11);
 		//made it here means its legit now we need to tell the vm about it
 
-		fprintf(output_file, "9 %d 0 1\n", curReg);//write
+		sprintf(PrintmaStack[pc], "9 %d 0 1\n", curReg);//write
 		pc++;
-		//fprintf(output_file, "4 %d 0 %d\n", curReg,temp);//sroe what you wrote
+		//sprintf(PrintmaStack[pc], "4 %d 0 %d\n", curReg,temp);//sroe what you wrote
 		//pc++;
 		num2++;
 		GETTOKEN();
@@ -412,9 +445,9 @@ void STATEMENT()
 		if (temp == num2 || temp == -1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
 			ERROR(11);
 		temp = decCounter + 3 - temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
-		fprintf(output_file, "10 %d 0 2\n", curReg);//this instruction is for vm only no more parsers
+		sprintf(PrintmaStack[pc], "10 %d 0 2\n", curReg);//this instruction is for vm only no more parsers
 		pc++;
-		fprintf(output_file, "4 %d 0 %d\n", curReg, temp);//first load into register
+		sprintf(PrintmaStack[pc], "4 %d 0 %d\n", curReg, temp);//first load into register
 		pc++;
 		num2++;
 		GETTOKEN();
@@ -432,7 +465,7 @@ void CONDITION()
 		GETTOKEN();
 		EXPRESSION();//gets the first number
 		curReg--;
-		fprintf(output_file, "17 %d %d 0\n", curReg, curReg);//this says odd it not positive on this one esp format
+		sprintf(PrintmaStack[pc], "17 %d %d 0\n", curReg, curReg);//this says odd it not positive on this one esp format
 	pc++;
 	}
 	else
@@ -445,11 +478,11 @@ void CONDITION()
 		EXPRESSION();
 		curReg--;
 		temp = temp + 10;
-		fprintf(output_file, "%d %d %d %d\n", temp, (curReg - 1), (curReg - 1), curReg);//you can pretty much always store it in the first register used
+		sprintf(PrintmaStack[pc], "%d %d %d %d\n", temp, (curReg - 1), (curReg - 1), curReg);//you can pretty much always store it in the first register used
 		pc++;
 		//anyway you take the token (stored in temp as it moved on ) add 10 and you get the call value, use it and the registers determined in expression to get here
 		temp=0;
-		//fprintf(output_file, "%d %d %d %d\n", temp, (curReg-1), (curReg-1), curReg);// not sure what else goes here, maybe used for a jump
+		//sprintf(PrintmaStack[pc], "%d %d %d %d\n", temp, (curReg-1), (curReg-1), curReg);// not sure what else goes here, maybe used for a jump
 	}
 }
 
@@ -480,7 +513,7 @@ void EXPRESSION()
     {
         curReg--;
         temp = temp + 9;//this gives the appropriate value for the first number, add instruction is 13 subtract 14, token values are 4 and 5 respectively
-        fprintf(output_file, "%d %d %d %d\n", temp, (curReg - 1), (curReg - 1), curReg);//1st is add or sub, second is where to store, 3rd is 1st value, 4th is 2nd value
+        sprintf(PrintmaStack[pc], "%d %d %d %d\n", temp, (curReg - 1), (curReg - 1), curReg);//1st is add or sub, second is where to store, 3rd is 1st value, 4th is 2nd value
         pc++;
 		temp = 0;
         curReg--; //the last value is now meaningless as it
@@ -499,7 +532,7 @@ void EXPRESSION()
 		TERM();
 		curReg--;
         temp = temp + 9;//this gives the appropriate value for the first number, add instruction is 13 subtract 14, token values are 4 and 5 respectively
-        fprintf(output_file, "%d %d %d %d\n", temp,(curReg-1),(curReg-1),curReg);//1st is add or sub, second is where to store, 3rd is 1st value, 4th is 2nd value
+        sprintf(PrintmaStack[pc], "%d %d %d %d\n", temp,(curReg-1),(curReg-1),curReg);//1st is add or sub, second is where to store, 3rd is 1st value, 4th is 2nd value
 
 		pc++;
 		temp = 0;
@@ -523,7 +556,7 @@ void TERM()
 			FACTOR();
 			curReg--;
 			temp = temp + 9;//this gives the appropriate value for the first number, mult instruction is 15 div 16, token values are 6 and 7 respectively
-			fprintf(output_file, "%d %d %d %d\n", temp,(curReg-1),(curReg-1),curReg);//1st is mult or div, second is where to store, 3rd is 1st value, 4th is 2nd value
+			sprintf(PrintmaStack[pc], "%d %d %d %d\n", temp,(curReg-1),(curReg-1),curReg);//1st is mult or div, second is where to store, 3rd is 1st value, 4th is 2nd value
 			pc++;
 			temp = 0;//clear temp
 			curReg--; //the last value is now meaningless as it was just to store that 1 value
@@ -552,12 +585,12 @@ void FACTOR()
 	    whereAmI2 = findInStack(variableList[num2]) + 4;//needs to be checked for initialization
 		 if ((whereAmI2-4)==num2)
             ERROR(11);
-	    fprintf(output_file, "3 %d 0 %d\n", curReg, whereAmI2);//load whatever new value into the register or say we did that works too
+	    sprintf(PrintmaStack[pc], "3 %d 0 %d\n", curReg, whereAmI2);//load whatever new value into the register or say we did that works too
 pc++;
 	   if (negate_flag==1)//if negation then turn the register that was just loaded (i.e.the one its about, negative
 	{
 	negate_flag=0;
-	fprintf(output_file, "12 %d %d 0\n", curReg, curReg);
+	sprintf(PrintmaStack[pc], "12 %d %d 0\n", curReg, curReg);
 	pc++;
 
 	}
@@ -573,11 +606,11 @@ pc++;
 	    //whereAmI=findInStack(variableList[(num2-1)])+4;//make sure this isn't first time seeing this varaible create checker class or just
 	    //if num2=whereAmI-4 send back an error, depends on how often we're checking idents for individual vs function
 	    //whereAmI2=findInStack(num2)+4;//needs to be checked for initialization
-	    fprintf(output_file, "1 %d 0 %d\n", curReg, TOKEN);
+	    sprintf(PrintmaStack[pc], "1 %d 0 %d\n", curReg, TOKEN);
 		pc++;
 		GETTOKEN();
 	    curReg++;//TOKEN value doesn't need to be saved in this program thats for the vm
-	    //fprintf(output_file, "4 %d 0 %d\n", curReg, whereAmI);
+	    //sprintf(PrintmaStack[pc], "4 %d 0 %d\n", curReg, whereAmI);
 	}
 
 	else if(TOKEN == lparentsym)
@@ -600,7 +633,7 @@ pc++;
 	{
 	negate_flag=0;
 	temp=0;
-	fprintf(output_file, "12 %d %d 0\n", curReg, curReg);//this will still be the most recent register to contain anything so anything to be negated would be here
+	sprintf(PrintmaStack[pc], "12 %d %d 0\n", curReg, curReg);//this will still be the most recent register to contain anything so anything to be negated would be here
 pc++;
 	}
 		GETTOKEN();
