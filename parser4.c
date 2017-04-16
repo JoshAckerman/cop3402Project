@@ -135,6 +135,21 @@ void main3(int printParser)
 		j++;
     }
     PROGRAM();
+    output_file = fopen("output.txt", "w");
+int i=0;
+for (i=0;i<1000;i++)
+
+{
+    if (PrintmaStack[i]==0)//since printmaStack ismade of chars this would mean a null
+    {
+        break;//it should be impossible to get past printmaStacks current value, i.e. no value should be blank
+    }
+    fprintf(output_file, PrintmaStack[i]);
+}
+
+
+
+fclose(output_file);
 if(printParser==1)
     {
     output_file = fopen("output.txt","r");
@@ -155,22 +170,9 @@ printf("\n");
 //			j++;
     }
     fclose(output_file);
-    output_file = fopen("output.txt", "w");
-int i=0;
-for (i=0;i<1000;i++)
-
-{
-    if (PrintmaStack[i]==0)//since printmaStack ismade of chars this would mean a null
-    {
-        break;//it should be impossible to get past printmaStacks current value, i.e. no value should be blank
-    }
-    fprintf(output_file, PrintmaStack[i]);
 }
 
 
-
-fclose(output_file);
-}
 printf("No errors, program is syntactically correct");
 }
 
