@@ -12,11 +12,15 @@ The code can read a variable from the screen if given a "read" command  but othe
 from the file, similarly it can write on the screen if given a "write" command otherwise everything 
 is stored in files. if you want to storea variable use a ":=".The symbols =, >, >=, <, <=, <>, and odd,
 can be used in if statements or while loops. for an if statement put if followed by the condition 
-you which to happen, followed by a then which precedes the action to happen. for a while loop begin with
-a while then your condition followed by do followed by the action you wish to occur (generally an equation)
-once the code is complete make sure there's an "end" and a "."  as without it there will be an error,
-also make sure that the const and var declarations end in a semicolon. Once all the code is there the
-scannerwill catch a few error but let most pass as it turns the code into numbers before storing it
+you which to happen, followed by a then which precedes the action to happen after the action the then activates 
+an else can be placed, though it is not required, the else will activate if the if condition is not met.
+ for a while loop begin with a while then your condition followed by do followed by the action you wish to 
+occur (generally an equation). lastly there's proc calls a proc is declared initially right before the actions 
+that is supposed to occur, if you want to go back to a proc call (you can only call a proc for something that 
+the code has read) just put call (proc name), once the proc finishes it should hit an end/rtn which will tell it to 
+go back to where it came from once the code is complete make sure there's an "end" and a "."  as without it there 
+will be an error, also make sure that the const and var declarations end in a semicolon. Once all the code is 
+there the scanner will catch a few error but let most pass as it turns the code into numbers before storing it
 and passing it on to the parser.
 
 The parser takes the code from the scanner and checks it for errors, if it finds one it stops the code 
