@@ -900,14 +900,7 @@ int main2(int printScanner) {
             i=0;
         }
 
-        if(d==0&&count==0&&temp[0]!='<'&&temp[0]!='>')
-        {
-            fprintf(fl,"2 ");
-        }
-        else if(d==1)
-        {
-            fprintf(fl,"3 ");
-        }
+
 
         if(temp[0]=='<'&&count==0)
         {
@@ -924,13 +917,21 @@ int main2(int printScanner) {
 
             if(seconded==0)
             {
+                //fprintf(fl,"d");
                     fprintf(ft,">             13\n");
                     fprintf(fl,"13 ");
             }
 
                     count=1;
         }
-
+        if(d==0&&count==0&&temp[0]!='<'&&temp[0]!='>')
+        {
+            fprintf(fl,"2 ");
+        }
+        else if(d==1)
+        {
+            fprintf(fl,"3 ");
+        }
         for(ir=0; ir<line;ir++)
         {
 
@@ -942,6 +943,7 @@ int main2(int printScanner) {
             }
             else if(d==1)
             {
+
                 fprintf(ft,"%d",tempNum[ir]);
                 fprintf(fl,"%d",tempNum[ir]);
                 active=1;
@@ -1192,7 +1194,8 @@ if(printScanner==1)
 //			j++;
     }
     fclose(fl);
-    
+
     }
     return 0;
 }
+
