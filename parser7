@@ -126,16 +126,18 @@ void main3(int printParser)
             if(tArray[j-1]==30)
          {
          decCounterCounter++;
+        VarNum++;
 
-         continue;
+
          }
+         else{
 			decCounter[decCounterCounter]++;
 			//memset(&varName, 0, sizeof(varName));//reset unstruction
 			fscanf(file, "%s", variableList[VarNum]);
 			//printf( "%s 1", variableList[VarNum]);
 			fprintf(fs, "%s ", variableList[VarNum]);
 			//strcpy(variableList[VarNum], varName);
-			VarNum++;
+			VarNum++;}
 		}
 		if(TOKEN == 3)
 		{
@@ -898,7 +900,6 @@ void ERROR(int errorCase)
     fw = fopen("cleaninput.txt", "r");
     char string[100];
     int length = 0;
-decCounterCounter=0;
     while(fscanf(fw, "%s", &string) == 1)
 	{
         length = strlen(string);
