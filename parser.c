@@ -114,7 +114,7 @@ void main3(int printParser)
 	{
         //TOKEN=atoi(tempTOKEN);
         tArray[j] = TOKEN;
-printf("%d\n",TOKEN);
+//printf("%d\n",TOKEN);
 
         if(badTOKEN==0)
         {
