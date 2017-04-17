@@ -492,7 +492,7 @@ void STATEMENT()
 		//printf("f");
 		if(TOKEN != endsym)
         {
-            printf("n%d",tArray[newCount+1]);
+            //printf("n%d",tArray[newCount+1]);
 			ERROR(8);//I don't know this error code
 			while(TOKEN!=endsym)
             {
@@ -640,7 +640,7 @@ void CONDITION()
 		EXPRESSION();
 		if (TOKEN != eqlsym && TOKEN != neqsym && TOKEN != lessym && TOKEN != leqsym && TOKEN != gtrsym && TOKEN != geqsym)
         {
-            printf("%d", tArray[newCount-3]);
+            //printf("%d", tArray[newCount-3]);
             ERROR(20);
             while(TOKEN != eqlsym && TOKEN != neqsym && TOKEN != lessym && TOKEN != leqsym && TOKEN != gtrsym && TOKEN != geqsym)
             {
