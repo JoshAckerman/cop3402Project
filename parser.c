@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+int noRepeat=0;
+int max=0;
 char tempTOKEN[1000];
 int TOKEN = 0;
 int tArray[1000];
@@ -19,8 +21,10 @@ int num2 = 0;
 int badTOKEN = 0;
 int negate_flag=0;
 int pc=0;
-int decCounter = 0;//when procs are implemented this will become an array with proc number being part 1
+int decCounter[40] ;//when procs are implemented this will become an array with proc number being part 1
+int decCounterCounter=0;
 FILE* output_file;
+char waste[100];
 
 //Allows for readability of code
 typedef enum
@@ -46,9 +50,15 @@ void ERROR(int errorCase);
 
 void main3(int printParser)
 {
+   // printf("p");
     FILE* file;
     file = fopen("lexemelist.txt","r");
 
+    int fresh;
+    for(fresh=0;fresh<40;fresh++)
+    {
+        decCounter[fresh]=0;
+    }
     // char* word = (char*)malloc(sizeof(char) * 128);
     // char space[2] = " ";
     FILE* fs;
@@ -104,34 +114,85 @@ void main3(int printParser)
 	{
         //TOKEN=atoi(tempTOKEN);
         tArray[j] = TOKEN;
+printf("%d\n",TOKEN);
+
         if(badTOKEN==0)
         {
+//fprintf(fs,"f");
             fprintf(fs, "%s ", printToken[TOKEN - 1]);
 
         }
         else
         {
+//fprintf(fs,"d");
             fprintf(fs, "%d ", TOKEN);
             badTOKEN = 0;
         }
         if(TOKEN == 2)
 		{
-		 if (tArray[j-1]==17||tArray[j-1]==28||tArray[j-1]==29)
-			decCounter++;
-			//memset(&varName, 0, sizeof(varName));//reset unstruction
-			fscanf(file, "%s", variableList[VarNum]);
+		 if (tArray[j-1]==17||tArray[j-1]==28||tArray[j-1]==29||tArray[j-1]==30)
+         {
+            if(tArray[j-1]==30)
+            {
+                decCounterCounter++;
+                fscanf(file, "%s", waste);
 			//printf( "%s 1", variableList[VarNum]);
-			fprintf(fs, "%s ", variableList[VarNum]);
+                fprintf(fs, "%s ", waste);
+                VarNum++;
+            }
+            else{
+                decCounter[decCounterCounter]++;
+			//memset(&varName, 0, sizeof(varName));//reset unstruction
+                fscanf(file, "%s", variableList[VarNum]);
+			//printf( "%s 1", variableList[VarNum]);
+                fprintf(fs, "%s ", variableList[VarNum]);
 			//strcpy(variableList[VarNum], varName);
-			VarNum++;
+                VarNum++;
+                }
+            }
+            else
+                {
+                    if(tArray[j-1]==3)
+                    {
+
+                    }
+                    else
+                    {
+                    fscanf(file, "%s", variableList[VarNum]);
+			//printf( "%s 1", variableList[VarNum]);
+                fprintf(fs, "%s ", variableList[VarNum]);
+                //printf("n%d",fscanf(file, "%d",&TOKEN));
+			//strcpy(variableList[VarNum], varName);
+                VarNum++;
+                    }
+                }
 		}
+
 		if(TOKEN == 3)
 		{
 			badTOKEN=1;
 		}
 		j++;
     }
+
+    decCounterCounter=0;
+    max=j;
     PROGRAM();
+    output_file = fopen("output.txt", "w");
+int i=0;
+for (i=0;i<1000;i++)
+
+{
+    if (PrintmaStack[i]==0)//since printmaStack ismade of chars this would mean a null
+    {
+        break;//it should be impossible to get past printmaStacks current value, i.e. no value should be blank
+    }
+    fprintf(output_file, PrintmaStack[i]);
+}
+
+
+
+fclose(output_file);
 if(printParser==1)
     {
     output_file = fopen("output.txt","r");
@@ -152,27 +213,21 @@ printf("\n");
 //			j++;
     }
     fclose(output_file);
-    output_file = fopen("output.txt", "w");
-int i=0;
-for (i=0;i<1000;i++)
+}
 
-{
-    if (PrintmaStack[i]==0)//since printmaStack ismade of chars this would mean a null
+
+    if(noRepeat==0)
     {
-        break;//it should be impossible to get past printmaStacks current value, i.e. no value should be blank
+        printf("No errors, program is syntactically correct");
     }
-    fprintf(output_file, PrintmaStack[i]);
-}
-
-
-
-fclose(output_file);
-}
-printf("No errors, program is syntactically correct");
 }
 
 void GETTOKEN()
 {
+    if(newCount==max+1)
+    {
+        exit(0);
+    }
     //This is added because numbers were getting mixed in and I believe that was an error
     if(badTOKEN==0)
     {
@@ -207,11 +262,17 @@ void PROGRAM()
 	//printf("f");
 
 	if (TOKEN != periodsym)
+    {
 		ERROR(9);
+		while(TOKEN!=periodsym)
+        {
+            GETTOKEN();
+        }
+    }
 
     sprintf(PrintmaStack[pc], "11 0 0 3\n");
 	pc++;
-    fclose(output_file);
+   // fclose(output_file);
 
 	return;
 }
@@ -219,10 +280,11 @@ void PROGRAM()
 void BLOCK()
 {
 	stackLoc = 4;
-    	sprintf(PrintmaStack[pc], "6 0 0 4\n");
-		pc++;
+    	//sprintf(PrintmaStack[pc], "6 0 0 4\n");
+		//pc++;
 
-    sprintf(PrintmaStack[pc], "6 0 0 %d\n", decCounter);
+    sprintf(PrintmaStack[pc], "6 0 0 %d\n", (decCounter[decCounterCounter]+4));
+    decCounterCounter++;
 	pc++;
 	if(TOKEN == constsym)
 	{
@@ -230,15 +292,33 @@ void BLOCK()
 		{
 			GETTOKEN();
 			if(TOKEN != identsym)
+            {
 				ERROR(4);
+				while(TOKEN!=identsym)
+                {
+                    GETTOKEN();
+                }
+            }
 			num2++;
 			GETTOKEN();
 			if(TOKEN != eqlsym)
+            {
 				ERROR(3);
+				while(TOKEN!=eqlsym)
+                {
+                    GETTOKEN();
+                }
+            }
 			//May be wrong
 			GETTOKEN();
 			if(TOKEN != numbersym)
-				ERROR(2);
+            {
+                ERROR(2);
+                while(TOKEN!=numbersym)
+                {
+                    GETTOKEN();
+                }
+            }
 			//the register to be used is first available, since this is a const declaration 0 will always be available
 			//I'm unsure of how Consts work in part 2 which may require this to change
 
@@ -256,6 +336,10 @@ void BLOCK()
         {
             //printf("p");
 			ERROR(5);
+			while(TOKEN!=semicolonsym)
+            {
+                    GETTOKEN();
+            }
         }
 
 		GETTOKEN();
@@ -268,7 +352,13 @@ void BLOCK()
 		{
 			GETTOKEN();
 			if(TOKEN != identsym)
+            {
 				ERROR(4);
+				while(TOKEN!=identsym)
+                {
+                    GETTOKEN();
+                }
+            }
 			num2++;
 			//printf("%dh",TOKEN);
 			GETTOKEN();
@@ -280,11 +370,15 @@ void BLOCK()
         {
             //printf("h");
 			ERROR(5);
+			while(TOKEN!=semicolonsym)
+            {
+                    GETTOKEN();
+            }
         }
-	}
+
 	//("%d",TOKEN);
     GETTOKEN();
-
+	}
 
 
 	while(TOKEN == procsym)//supposed to be an error so itll be invalid identifier
@@ -292,20 +386,43 @@ void BLOCK()
 		//ERROR(11);//invalid identifier, this code can be here as its unreachable
 		GETTOKEN();
 		if(TOKEN != identsym)
+        {
 			ERROR(4);
+			while(TOKEN!=identsym)
+            {
+                    GETTOKEN();
+            }
+        }
 		num2++;
 		GETTOKEN();
 		if(TOKEN != semicolonsym)
+        {
+            printf("%d",tArray[newCount+2]);
 			ERROR(5);
+			while(TOKEN!=semicolonsym)
+            {
+                    GETTOKEN();
+            }
+        }
 		GETTOKEN();
 		BLOCK();
 		if(TOKEN != semicolonsym)
+        {
 			ERROR(5);
+			while(TOKEN!=semicolonsym)
+            {
+                    GETTOKEN();
+            }
+        }
 		GETTOKEN();
 	}
 
 	//printf("%d",TOKEN);
+	//while(TOKEN!=endsym)
+    //printf("%d",TOKEN);
+
 	STATEMENT();
+	//GETTOKEN();
 	// printf("j");
 
 }
@@ -319,7 +436,14 @@ void STATEMENT()
 	{
 		GETTOKEN();
 		if(TOKEN != becomessym)
-			ERROR(13);
+        {
+            printf("%d",tArray[newCount-2]);
+            ERROR(13);
+            while(TOKEN!=becomessym)
+            {
+                    GETTOKEN();
+            }
+        }
 		GETTOKEN();
 		//printf("p%dp",TOKEN);
 		temp = num2;
@@ -331,7 +455,7 @@ void STATEMENT()
 		sprintf(PrintmaStack[pc], "4 %d 0 %d\n", curReg, whereAmI);
 		pc++;
 		temp = 0;
-		STATEMENT();
+
 		//printf("p%dp",TOKEN);
 		//num2++;//tells where on the list of string to find current one
 	}
@@ -339,7 +463,13 @@ void STATEMENT()
 	{
 		GETTOKEN();
 		if (TOKEN != identsym)
-			ERROR(14);
+		{
+		    ERROR(14);
+		    while(TOKEN!=identsym)
+            {
+                    GETTOKEN();
+            }
+		}
 		num2++;
 		GETTOKEN();
 	}
@@ -350,14 +480,21 @@ void STATEMENT()
 		while(TOKEN == semicolonsym)
 		{
 			GETTOKEN();
+//printf("%do",TOKEN);
+//printf("p%d",tArray[newCount+2]);
 			STATEMENT();
+//printf("\n%dq",TOKEN);
 		}
-		//printf("%d",TOKEN);
+	//	printf("%dy",TOKEN);
 		//printf("f");
 		if(TOKEN != endsym)
         {
-            //printf("%d",TOKEN);
+            printf("n%d",tArray[newCount+1]);
 			ERROR(8);//I don't know this error code
+			while(TOKEN!=endsym)
+            {
+                    GETTOKEN();
+            }
         }
 
 		GETTOKEN();
@@ -369,7 +506,13 @@ void STATEMENT()
 		GETTOKEN();
 		CONDITION();
 		if (TOKEN != thensym)
-			ERROR(16);
+        {
+            ERROR(16);
+            while(TOKEN!=thensym)
+            {
+                    GETTOKEN();
+            }
+        }
 		GETTOKEN();
 		sprintf(PrintmaStack[pc], "1 %d 0 1\n", (curReg+1));//load 1 into the register
 			pc++;
@@ -380,7 +523,7 @@ void STATEMENT()
 			tempPC2=pc;
 		sprintf(PrintmaStack[pc], "7 0 0 %d\n",  (pc+4));//skip past this partof the code as if is not met, pc+4 is a holder
 			pc++;
-		EXPRESSION();
+		STATEMENT();
 		sprintf(PrintmaStack[tempPC2], "7 0 0 %d\n",  (pc));//skip past this partof the code as if is not met
 		if (TOKEN==elsesym)//else isn't mandatory so this can be skipped
         {
@@ -390,7 +533,7 @@ void STATEMENT()
             sprintf(PrintmaStack[pc], "7 0 0 %d\n",  (pc));//need to reserve a spot for the jump past the else statement, the %d doesnt matter yet
             pc++;
             GETTOKEN();
-            EXPRESSION();
+            STATEMENT();
             sprintf(PrintmaStack[tempPC3], "7 0 0 %d\n",  (pc));//end of the else statement which means this is the spot to jump to, change tempPC3
         }
 	}
@@ -401,7 +544,13 @@ void STATEMENT()
 		tempPC1=pc;
 		CONDITION();
 		if(TOKEN != dosym)
+        {
 			ERROR(18);
+			while(TOKEN!=dosym)
+            {
+                    GETTOKEN();
+            }
+        }
 		GETTOKEN();
 		sprintf(PrintmaStack[pc], "1 %d 0 1\n", (curReg+1));//load 1 into the register
                 pc++;
@@ -412,7 +561,7 @@ void STATEMENT()
                 tempPC=pc;
             sprintf(PrintmaStack[pc], "7 0 0 %d\n", (pc+5));//skip past this partof the code as if is not met
                 pc++;
-		EXPRESSION();//statement will loop right by when we implement proc this will cause issues.
+		STATEMENT();//statement will loop right by when we implement proc this will cause issues.
 		sprintf(PrintmaStack[tempPC], "7 0 0 %d\n", (pc));//changes to the real jump spot
 		sprintf(PrintmaStack[pc], "7 0 0 %d\n", (tempPC1));//needs to go back to the original while condition could be 1 off
 
@@ -424,7 +573,13 @@ void STATEMENT()
 	{
 		GETTOKEN();
 		if(TOKEN != identsym)
-			ERROR(4);
+        {
+            ERROR(4);
+            while(TOKEN!=identsym)
+            {
+                    GETTOKEN();
+            }
+        }
 		temp = findInStack(variableList[num2]);//since num2 says where in the identifier list we're up to its used here
 		if (temp == num2 || temp == -1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
 			ERROR(11);
@@ -436,24 +591,30 @@ void STATEMENT()
 		//pc++;
 		num2++;
 		GETTOKEN();
-		STATEMENT();//checks for whatever comes next
+		//checks for whatever comes next
 	}
 	else if (TOKEN == readsym)
 	{
 		GETTOKEN();
 		if(TOKEN != identsym)
-			ERROR(4);
+        {
+            ERROR(4);
+            while(TOKEN!=identsym)
+            {
+                    GETTOKEN();
+            }
+        }
 		temp = findInStack(variableList[num2]);//since num2 says where in the identifier list we're up to its used here
 		if (temp == num2 || temp == -1)//this means the variable wasn't found before it hit itself (or at all which would be worse)
 			ERROR(11);
-		temp = decCounter + 3 - temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
+		temp = decCounter[decCounterCounter] + 3 - temp;//how far from the end it has to go decCounter+4  gives stack height-temp gives distance from the end
 		sprintf(PrintmaStack[pc], "10 %d 0 2\n", curReg);//this instruction is for vm only no more parsers
 		pc++;
 		sprintf(PrintmaStack[pc], "4 %d 0 %d\n", curReg, temp);//first load into register
 		pc++;
 		num2++;
 		GETTOKEN();
-		STATEMENT();//whats next
+		//whats next
 	}
 	//printf("y%dj",TOKEN);
 	//printf("%d",TOKEN);
@@ -461,7 +622,7 @@ void STATEMENT()
 
 void CONDITION()
 {
-    printf("o%do",TOKEN);
+    //printf("o%do",TOKEN);
 	int temp=0;
 	if(TOKEN == oddsym)
 	{
@@ -475,7 +636,13 @@ void CONDITION()
 	{
 		EXPRESSION();
 		if (TOKEN != eqlsym && TOKEN != neqsym && TOKEN != lessym && TOKEN != leqsym && TOKEN != gtrsym && TOKEN != geqsym)
-			ERROR(20);
+        {
+            ERROR(20);
+            while(TOKEN != eqlsym && TOKEN != neqsym && TOKEN != lessym && TOKEN != leqsym && TOKEN != gtrsym && TOKEN != geqsym)
+            {
+                    GETTOKEN();
+            }
+        }
 		temp=TOKEN;
 		GETTOKEN();
 		EXPRESSION();
@@ -492,7 +659,7 @@ void CONDITION()
 void EXPRESSION()
 {
 	int temp=0;
-	printf("h%dh",TOKEN);
+	//printf("h%dh",TOKEN);
 	if(TOKEN == plussym)
 	{
 		GETTOKEN();
@@ -521,16 +688,19 @@ void EXPRESSION()
 		temp = 0;
         curReg--; //the last value is now meaningless as it
     }
-
 	while(TOKEN == plussym || TOKEN == minussym)
 	{
-	    if(TOKEN == minussym&&(tArray[TOKEN-1]!=2&&tArray[TOKEN-2]!=3))//this means its a negation, set a flag to mark it and after it reads the next variable we can negate thator whatevers in the parenthesis
+//printf("l%d",tArray[TOKEN-1]);
+	   /* if(TOKEN == minussym&&(tArray[TOKEN-1]!=2&&tArray[TOKEN-2]!=3))//this means its a negation, set a flag to mark it and after it reads the next variable we can negate thator whatevers in the parenthesis
 	{
 		negate_flag =1;
 		GETTOKEN();
+//printf("q%d",TOKEN);
+
 	}
-	else{
+	else{*/
 	    temp = TOKEN + 9;
+	    //printf("%du",TOKEN);
 		GETTOKEN();
 		TERM();
 		curReg--;
@@ -540,7 +710,7 @@ void EXPRESSION()
 		pc++;
 		temp = 0;
         curReg--; //the last value is now meaningless as it was just to store that 1value
-	}}
+	}
 	if(TOKEN == multsym || TOKEN == slashsym)//order of operations could have issues
         TERM();
 }
@@ -548,7 +718,7 @@ void EXPRESSION()
 void TERM()
 {
 	int temp = 0;
-	printf("g%dp",TOKEN);
+	//printf("g%dp",TOKEN);
 	if(TOKEN == multsym || TOKEN == slashsym)
 	{
 		while(TOKEN == multsym || TOKEN == slashsym)
@@ -576,10 +746,11 @@ void FACTOR()
 {
     int whereAmI = 0;
     int whereAmI2 = 0;
-	printf("i%dh",TOKEN);
+	//printf("i%dh",TOKEN);
 	if(TOKEN == identsym)
 	{
 		GETTOKEN();//pretty much just saying move on
+//printf("i%d",TOKEN);
 		//if(tArray[newCount-1]==20&&tArray[newCount+1]>3&&tArray[newCount+1]<8)//previous is assignment next isn't a pemdas this is a 1off spot
 		//{
 	    //whereAmI=findInStack(variableList[(num2-1)])+4;
@@ -599,12 +770,13 @@ pc++;
 	}
 	    curReg++;
 		//}
+		//GETTOKEN();
 		num2++;
 	}
 	else if(TOKEN == numbersym)
 	{
 		GETTOKEN();//get the number
-		printf("t%dt", TOKEN);
+		//printf("t%dt", TOKEN);
 	if ((TOKEN/100,000)!=0)
             ERROR(25);
 	    //whereAmI=findInStack(variableList[(num2-1)])+4;//make sure this isn't first time seeing this varaible create checker class or just
@@ -612,8 +784,9 @@ pc++;
 	    //whereAmI2=findInStack(num2)+4;//needs to be checked for initialization
 	    sprintf(PrintmaStack[pc], "1 %d 0 %d\n", curReg, TOKEN);
 		pc++;
+//printf("%d",TOKEN);
 		GETTOKEN();
-		printf("g%dg",TOKEN);
+		//printf("g%dg",TOKEN);
 	    curReg++;//TOKEN value doesn't need to be saved in this program thats for the vm
 	    //sprintf(PrintmaStack[pc], "4 %d 0 %d\n", curReg, whereAmI);
 	}
@@ -632,7 +805,13 @@ pc++;
 			GETTOKEN();
 			EXPRESSION();
 			if(TOKEN > 7)//this can only be numbers symbols or equation materials anything else gets caught here since its number >7
-				ERROR(22);
+            {
+                ERROR(22);
+                while(TOKEN>7)
+                {
+                    GETTOKEN();
+                }
+            }
 		}
     if (temp==1)//its possible to get here with a negation active
 	{
@@ -644,8 +823,13 @@ pc++;
 		GETTOKEN();
     }
 	else{
-            printf("%d",TOKEN);
+            //printf("%d",TOKEN);
 		ERROR(23);
+		while(TOKEN!=identsym||TOKEN!=numbersym||TOKEN!=rparentsym)
+        {
+            GETTOKEN();
+        }
+        STATEMENT();
 	}
 }
 
@@ -742,11 +926,12 @@ void ERROR(int errorCase)
             break;
     }
 
+    if(noRepeat==0)
+    {
     FILE* fw;
     fw = fopen("cleaninput.txt", "r");
     char string[100];
     int length = 0;
-
     while(fscanf(fw, "%s", &string) == 1)
 	{
         length = strlen(string);
@@ -778,7 +963,7 @@ void ERROR(int errorCase)
 
 		if (TOKEN == 2)
 		{
-			decCounter++;
+			decCounter[decCounterCounter]++;
 			//memset(&varName, 0, sizeof(varName));//reset unstruction
 			//fscanf(file, "%s", variableList[VarNum]);
 			//printf( "%s 1", variableList[VarNum]);
@@ -793,7 +978,9 @@ void ERROR(int errorCase)
 		}
 		//j++;
     }
+    noRepeat=1;
+    }
     //printf("%d",TOKEN);
-    exit(0);
+    //return 0;
 
 }
