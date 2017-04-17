@@ -288,11 +288,12 @@ void BLOCK()
 	pc++;
 	if(TOKEN == constsym)
 	{
-		while(TOKEN != commasym)
+		do
 		{
 			GETTOKEN();
 			if(TOKEN != identsym)
             {
+                printf("%d", tArray[newCount+3]);
 				ERROR(4);
 				while(TOKEN!=identsym)
                 {
@@ -330,7 +331,9 @@ void BLOCK()
 			stackLoc++;
 
 			GETTOKEN();
-		}
+			GETTOKEN();
+			//printf("n%d",TOKEN);
+		}while(TOKEN == commasym);
 
 		if(TOKEN != semicolonsym)
         {
@@ -637,6 +640,7 @@ void CONDITION()
 		EXPRESSION();
 		if (TOKEN != eqlsym && TOKEN != neqsym && TOKEN != lessym && TOKEN != leqsym && TOKEN != gtrsym && TOKEN != geqsym)
         {
+            printf("%d", tArray[newCount-3]);
             ERROR(20);
             while(TOKEN != eqlsym && TOKEN != neqsym && TOKEN != lessym && TOKEN != leqsym && TOKEN != gtrsym && TOKEN != geqsym)
             {
